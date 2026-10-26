@@ -233,16 +233,37 @@
     </section>
   </main>
 
-<script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, deleteUser }
+    from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, doc, setDoc, getDoc, serverTimestamp }
+    from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  // 1) Paste your own config from Firebase Console > Project settings > Your apps > Web app
+ const firebaseConfig = {
+  apiKey: "AIzaSyDbxUTsBSeFIevnbJadEHkubyKBRHdDM94",
+  authDomain: "geniusinstitute-unnao.firebaseapp.com",
+  projectId: "geniusinstitute-unnao",
+  storageBucket: "geniusinstitute-unnao.firebasestorage.app",
+  messagingSenderId: "457602291145",
+  appId: "1:457602291145:web:678518a46dd475dd540418",
+  measurementId: "G-10RZJQMHR7"
+  };
   const HOME_PAGE = ""; // page to open after login, e.g. "dashboard.html"
-  const KEY = "institute_students";
+  const EMAIL_DOMAIN = "students.institute.app"; // internal only: mobile number becomes mobile@this-domain
+
+  const configured = !firebaseConfig.apiKey.startsWith("YOUR_");
+  let auth, db;
+  if (configured) {
+    const app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    db = getFirestore(app);
+  }
 
   const $ = (id) => document.getElementById(id);
   const loginView = $("loginView"), signupView = $("signupView");
-
-  // Demo storage in the browser. Replace with a real backend for production.
-  function getUsers() { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } }
-  function saveUsers(u) { try { localStorage.setItem(KEY, JSON.stringify(u)); return true; } catch (e) { return false; } }
+  const toEmail = (mobile) => mobile + "@" + EMAIL_DOMAIN;
 
   function show(view) {
     const toSignup = view === "signup";
@@ -256,7 +277,6 @@
   $("toLogin").addEventListener("click", (e) => { e.preventDefault(); show("login"); });
   if (location.hash === "#signup") { signupView.hidden = false; loginView.hidden = true; }
 
-  // digits only for mobile fields
   ["lMobile", "sMobile"].forEach((id) => $(id).addEventListener("input", (e) => {
     e.target.value = e.target.value.replace(/\D/g, "").slice(0, 10);
   }));
@@ -265,9 +285,16 @@
 
   function msg(el, text, ok) { el.textContent = text; el.className = "msg " + (ok ? "ok" : "err"); }
   function mark(fields, bad) { fields.forEach((f) => f.setAttribute("aria-invalid", bad.includes(f))); }
+  function busy(form, on, label) {
+    const b = form.querySelector("button.primary");
+    b.disabled = on; b.style.opacity = on ? .7 : 1;
+    b.textContent = on ? "Please wait…" : label;
+  }
+  const NOT_SET = "Firebase is not set up yet. Add your config in the script of login.html.";
 
-  $("signupForm").addEventListener("submit", (e) => {
+  $("signupForm").addEventListener("submit", async (e) => {
     e.preventDefault();
+    const form = e.target;
     const f = { name: $("sName"), mobile: $("sMobile"), email: $("sEmail"), parent: $("sParent"),
                 cls: $("sClass"), subject: $("sSubject"), dob: $("sDob") };
     const all = Object.values(f);
@@ -284,32 +311,70 @@
         : first === f.subject && bad.length === 1 ? "Select at least one subject." : "Fill in all fields.", false);
       (first === f.subject ? f.subject.querySelector("input") : first).focus(); return;
     }
-    const users = getUsers();
-    if (users[f.mobile.value]) { mark(all, [f.mobile]); msg($("sMsg"), "This mobile number is already registered. Log in instead.", false); return; }
-    users[f.mobile.value] = {
-      name: f.name.value.trim(), mobile: f.mobile.value, email: f.email.value.trim(),
-      parent: f.parent.value.trim(), cls: f.cls.value, subjects: subjects, dob: f.dob.value
-    };
-    if (!saveUsers(users)) { msg($("sMsg"), "Could not save. Check your browser storage settings.", false); return; }
-    msg($("sMsg"), "Account created. Taking you to login…", true);
-    const m = f.mobile.value;
-    setTimeout(() => { $("signupForm").reset(); show("login"); $("lMobile").value = m; $("lPass").focus(); }, 1200);
+    if (!configured) { msg($("sMsg"), NOT_SET, false); return; }
+
+    busy(form, true, "Create account");
+    let cred;
+    try {
+      // Login account: mobile number + date of birth as password
+      cred = await createUserWithEmailAndPassword(auth, toEmail(f.mobile.value), f.dob.value);
+      // Student details saved in Firestore
+      await setDoc(doc(db, "students", cred.user.uid), {
+        name: f.name.value.trim(),
+        mobile: f.mobile.value,
+        gmail: f.email.value.trim().toLowerCase(),
+        parentName: f.parent.value.trim(),
+        class: f.cls.value,
+        subjects: subjects,
+        dob: f.dob.value,
+        createdAt: serverTimestamp()
+      });
+      await signOut(auth);
+      const m = f.mobile.value;
+      msg($("sMsg"), "Account created. Taking you to login…", true);
+      setTimeout(() => { form.reset(); busy(form, false, "Create account"); show("login"); $("lMobile").value = m; $("lPass").focus(); }, 1200);
+    } catch (err) {
+      if (cred && cred.user) { try { await deleteUser(cred.user); } catch (x) {} } // avoid half-created account
+      const map = {
+        "auth/email-already-in-use": "This mobile number is already registered. Log in instead.",
+        "auth/operation-not-allowed": "Email/Password sign-in is not enabled in Firebase Authentication.",
+        "auth/network-request-failed": "No internet connection. Check your network and try again.",
+        "permission-denied": "Firestore rules blocked saving. Check your security rules."
+      };
+      if (err.code === "auth/email-already-in-use") mark(all, [f.mobile]);
+      msg($("sMsg"), map[err.code] || "Could not create the account. Try again.", false);
+      busy(form, false, "Create account");
+    }
   });
 
-  $("loginForm").addEventListener("submit", (e) => {
+  $("loginForm").addEventListener("submit", async (e) => {
     e.preventDefault();
-    const m = $("lMobile"), p = $("lPass");
+    const form = e.target, m = $("lMobile"), p = $("lPass");
     if (!/^[6-9]\d{9}$/.test(m.value) || !p.value) {
       mark([m, p], [!/^[6-9]\d{9}$/.test(m.value) ? m : p]);
       msg($("lMsg"), "Enter your mobile number and date of birth.", false); return;
     }
-    const user = getUsers()[m.value];
-    if (!user) { mark([m, p], [m]); msg($("lMsg"), "This mobile number is not registered. Create an account first.", false); return; }
-    if (user.dob !== p.value) { mark([m, p], [p]); msg($("lMsg"), "Wrong date of birth. Try again.", false); return; }
-    mark([m, p], []);
-    try { sessionStorage.setItem("institute_session", user.mobile); } catch (err) {}
-    msg($("lMsg"), "Welcome, " + user.name + "!", true);
-    if (HOME_PAGE) setTimeout(() => { location.href = HOME_PAGE; }, 800);
+    if (!configured) { msg($("lMsg"), NOT_SET, false); return; }
+    busy(form, true, "Log in");
+    try {
+      const cred = await signInWithEmailAndPassword(auth, toEmail(m.value), p.value);
+      mark([m, p], []);
+      let name = "";
+      try { const snap = await getDoc(doc(db, "students", cred.user.uid)); if (snap.exists()) name = snap.data().name; } catch (x) {}
+      msg($("lMsg"), "Welcome" + (name ? ", " + name : "") + "!", true);
+      if (HOME_PAGE) setTimeout(() => { location.href = HOME_PAGE; }, 800);
+    } catch (err) {
+      const map = {
+        "auth/invalid-credential": "Mobile number or date of birth is wrong. Create an account if you are new.",
+        "auth/user-not-found": "This mobile number is not registered. Create an account first.",
+        "auth/wrong-password": "Wrong date of birth. Try again.",
+        "auth/too-many-requests": "Too many attempts. Wait a few minutes and try again.",
+        "auth/network-request-failed": "No internet connection. Check your network and try again."
+      };
+      mark([m, p], [m, p]);
+      msg($("lMsg"), map[err.code] || "Could not log in. Try again.", false);
+    }
+    busy(form, false, "Log in");
   });
 </script>
 </body>
