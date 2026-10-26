@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Institute Logo Splash</title>
+<style>
+  :root {
+    --bg: #e6e9fb;
+    --clay: #7c8cff;
+    --clay-light: #a9b4ff;
+    --clay-dark: #5566e0;
+    --accent: #ffb38a;
+    --text: #2d3270;
+    --shadow-dark: rgba(85, 102, 224, .38);
+    --shadow-light: rgba(255, 255, 255, .95);
+    --size: clamp(150px, 38vmin, 300px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1d2040;
+      --clay: #6f7fff;
+      --clay-light: #9aa6ff;
+      --clay-dark: #3b49b8;
+      --accent: #ff9f72;
+      --text: #e8ebff;
+      --shadow-dark: rgba(8, 10, 35, .7);
+      --shadow-light: rgba(120, 135, 255, .22);
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Nunito", "Trebuchet MS", system-ui, sans-serif;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+
+  /* soft clay blobs in background */
+  .blob {
+    position: absolute;
+    border-radius: 50%;
+    background: var(--clay-light);
+    box-shadow: inset -12px -12px 24px var(--shadow-dark), inset 12px 12px 24px var(--shadow-light);
+    opacity: 0;
+    animation: pop .7s cubic-bezier(.34, 1.56, .64, 1) forwards;
+  }
+  .b1 { width: 18vmin; height: 18vmin; top: 10%; left: 8%; animation-delay: .05s; }
+  .b2 { width: 12vmin; height: 12vmin; bottom: 14%; right: 10%; background: var(--accent); animation-delay: .2s; }
+  .b3 { width: 8vmin; height: 8vmin; top: 18%; right: 16%; animation-delay: .35s; }
+
+  .stage {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(18px, 4vmin, 34px);
+    z-index: 1;
+  }
+
+  /* logo: clay disc with embossed monogram */
+  .logo {
+    width: var(--size);
+    height: var(--size);
+    border-radius: 32%;
+    background: linear-gradient(145deg, var(--clay-light), var(--clay));
+    box-shadow:
+      18px 22px 40px var(--shadow-dark),
+      -14px -14px 30px var(--shadow-light),
+      inset -10px -12px 22px var(--clay-dark),
+      inset 10px 12px 22px rgba(255, 255, 255, .45);
+    display: grid;
+    place-items: center;
+    transform: scale(0);
+    animation: logoIn 1.1s cubic-bezier(.34, 1.56, .64, 1) .1s forwards;
+  }
+  .logo svg { width: 58%; height: 58%; overflow: visible; }
+  .logo .mark { filter: drop-shadow(3px 4px 3px rgba(40, 50, 140, .45)); }
+  .logo .book-l, .logo .book-r {
+    transform-origin: 50% 70%;
+    animation: open .8s ease-out .55s both;
+  }
+  .logo .book-l { --r: -14deg; }
+  .logo .book-r { --r: 14deg; }
+  .logo .star {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: starPop .6s cubic-bezier(.34, 1.56, .64, 1) .9s both;
+  }
+
+  .name {
+    font-weight: 900;
+    font-size: clamp(1.3rem, 5.2vmin, 2.6rem);
+    letter-spacing: .02em;
+    text-align: center;
+    padding: .55em 1.4em;
+    border-radius: 999px;
+    background: var(--bg);
+    box-shadow: 8px 8px 18px var(--shadow-dark), -8px -8px 18px var(--shadow-light), inset 0 0 0 transparent;
+    opacity: 0;
+    transform: translateY(14px) scale(.9);
+    animation: nameIn .6s cubic-bezier(.34, 1.56, .64, 1) .85s forwards;
+  }
+
+  @keyframes pop { from { opacity: 0; transform: scale(0); } to { opacity: .9; transform: scale(1); } }
+  @keyframes logoIn {
+    0%   { transform: scale(0) rotate(-40deg); }
+    60%  { transform: scale(1.08) rotate(6deg); }
+    100% { transform: scale(1) rotate(0); }
+  }
+  @keyframes open { from { transform: rotate(0); } to { transform: rotate(var(--r)); } }
+  @keyframes starPop { from { transform: scale(0) rotate(-90deg); opacity: 0; } to { transform: scale(1) rotate(0); opacity: 1; } }
+  @keyframes nameIn { to { opacity: 1; transform: none; } }
+
+  body.leave .stage { animation: leave .45s ease-in forwards; }
+  @keyframes leave { to { opacity: 0; transform: scale(.92); } }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: .01s !important; animation-delay: 0s !important; }
+  }
+</style>
+</head>
+<body>
+  <div class="blob b1"></div>
+  <div class="blob b2"></div>
+  <div class="blob b3"></div>
+
+  <main class="stage">
+    <div class="logo" role="img" aria-label="Institute logo">
+      <!-- Replace this SVG with your institute's real logo -->
+      <svg class="mark" viewBox="0 0 100 100" fill="none">
+        <g class="book-l"><path d="M50 78 C38 68 22 66 10 70 L10 34 C22 30 38 32 50 42 Z" fill="#fff"/></g>
+        <g class="book-r"><path d="M50 78 C62 68 78 66 90 70 L90 34 C78 30 62 32 50 42 Z" fill="#fff" fill-opacity=".85"/></g>
+        <path class="star" d="M50 6 L55 19 L69 20 L58 29 L62 43 L50 35 L38 43 L42 29 L31 20 L45 19 Z" fill="#ffb38a"/>
+      </svg>
+    </div>
+    <div class="name">Genius Institute</div>
+  </main>
+
+<script>
+  // Splash shows ~2 seconds, then fades out and goes to the main page.
+  const SHOW_MS = 2000;
+  const NEXT_PAGE = "login.html";
+
+  setTimeout(() => {
+    document.body.classList.add("leave");
+    setTimeout(() => {
+      if (NEXT_PAGE) window.location.href = NEXT_PAGE;
+    }, 450);
+  }, SHOW_MS);
+</script>
+</body>
+</html>
