@@ -92,6 +92,32 @@
   input:focus-visible, select:focus-visible { box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light), 0 0 0 3px var(--clay); }
   input[aria-invalid="true"], select[aria-invalid="true"] { box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light), 0 0 0 2px var(--err); }
   .hint { font-size: .78rem; color: var(--muted); padding-left: 6px; }
+  fieldset.subjects { border: 0; min-width: 0; display: grid; gap: 8px; }
+  fieldset.subjects legend { font-weight: 800; font-size: .88rem; padding: 0 0 8px 6px; float: left; width: 100%; }
+  .chips { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; clear: both; }
+  .chip { position: relative; display: block; cursor: pointer; padding: 0; font-weight: 800; }
+  .chip input {
+    position: absolute; inset: 0; width: 100%; height: 100%; min-height: 0; opacity: 0; cursor: pointer; margin: 0;
+  }
+  .chip span {
+    display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 10px 14px; border-radius: 18px;
+    background: var(--bg); font-size: .92rem;
+    box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light);
+    transition: box-shadow .2s, background .2s, color .2s;
+  }
+  .chip span::before {
+    content: ""; flex: none; width: 20px; height: 20px; border-radius: 7px; background: var(--bg);
+    box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+    display: grid; place-items: center; font-size: 13px; color: #fff; line-height: 1;
+  }
+  .chip input:checked + span {
+    background: linear-gradient(145deg, var(--clay-light), var(--clay)); color: #fff;
+    text-shadow: 1px 1px 2px rgba(40,50,140,.5);
+    box-shadow: inset 4px 4px 8px var(--clay-dark), inset -3px -3px 8px rgba(255,255,255,.35);
+  }
+  .chip input:checked + span::before { content: "\2713"; background: var(--accent); box-shadow: 2px 2px 4px rgba(40,50,140,.4); }
+  .chip input:focus-visible + span { outline: 3px solid var(--text); outline-offset: 2px; }
+  fieldset.subjects[aria-invalid="true"] .chip span { box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light), 0 0 0 2px var(--err); }
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   @media (max-width: 420px) { .grid2 { grid-template-columns: 1fr; } }
 
@@ -175,25 +201,26 @@
           <label for="sParent">Parent's name</label>
           <input id="sParent" type="text" placeholder="Parent or guardian name" required>
         </div>
-        <div class="grid2">
-          <div class="field">
-            <label for="sClass">Class</label>
-            <select id="sClass" required>
-              <option value="">Select</option>
-              <option>6</option><option>7</option><option>8</option><option>9</option>
-              <option>10</option><option>11</option><option>12</option><option>Dropper</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="sSubject">Subject</label>
-            <select id="sSubject" required>
-              <option value="">Select</option>
-              <option>Maths</option><option>Science</option><option>Physics</option>
-              <option>Chemistry</option><option>Biology</option><option>English</option>
-              <option>All subjects</option>
-            </select>
-          </div>
+        <div class="field">
+          <label for="sClass">Class</label>
+          <select id="sClass" required>
+            <option value="">Select class</option>
+            <option>6</option><option>7</option><option>8</option><option>9</option>
+            <option>10</option><option>11</option><option>12</option><option>Dropper</option>
+          </select>
         </div>
+        <fieldset class="field subjects" id="sSubject" aria-describedby="subHint">
+          <legend>Subjects</legend>
+          <div class="chips">
+            <label class="chip"><input type="checkbox" name="subject" value="Maths"><span>Maths</span></label>
+            <label class="chip"><input type="checkbox" name="subject" value="Science"><span>Science</span></label>
+            <label class="chip"><input type="checkbox" name="subject" value="Physics"><span>Physics</span></label>
+            <label class="chip"><input type="checkbox" name="subject" value="Chemistry"><span>Chemistry</span></label>
+            <label class="chip"><input type="checkbox" name="subject" value="Biology"><span>Biology</span></label>
+            <label class="chip"><input type="checkbox" name="subject" value="English"><span>English</span></label>
+          </div>
+          <span class="hint" id="subHint">Select one or more subjects.</span>
+        </fieldset>
         <div class="field">
           <label for="sDob">Date of birth</label>
           <input id="sDob" type="date" required>
@@ -244,21 +271,24 @@
     const f = { name: $("sName"), mobile: $("sMobile"), email: $("sEmail"), parent: $("sParent"),
                 cls: $("sClass"), subject: $("sSubject"), dob: $("sDob") };
     const all = Object.values(f);
-    const bad = all.filter((el) => !el.value.trim());
+    const subjects = [...f.subject.querySelectorAll("input:checked")].map((c) => c.value);
+    const bad = all.filter((el) => el !== f.subject && !el.value.trim());
+    if (!subjects.length) bad.push(f.subject);
     if (f.mobile.value && !/^[6-9]\d{9}$/.test(f.mobile.value)) bad.push(f.mobile);
     if (f.email.value && !/^[^\s@]+@gmail\.com$/i.test(f.email.value.trim())) bad.push(f.email);
     mark(all, bad);
     if (bad.length) {
       const first = bad[0];
       msg($("sMsg"), first === f.mobile ? "Enter a valid 10-digit mobile number."
-        : first === f.email ? "Enter a valid Gmail address." : "Fill in all fields.", false);
-      first.focus(); return;
+        : first === f.email ? "Enter a valid Gmail address."
+        : first === f.subject && bad.length === 1 ? "Select at least one subject." : "Fill in all fields.", false);
+      (first === f.subject ? f.subject.querySelector("input") : first).focus(); return;
     }
     const users = getUsers();
     if (users[f.mobile.value]) { mark(all, [f.mobile]); msg($("sMsg"), "This mobile number is already registered. Log in instead.", false); return; }
     users[f.mobile.value] = {
       name: f.name.value.trim(), mobile: f.mobile.value, email: f.email.value.trim(),
-      parent: f.parent.value.trim(), cls: f.cls.value, subject: f.subject.value, dob: f.dob.value
+      parent: f.parent.value.trim(), cls: f.cls.value, subjects: subjects, dob: f.dob.value
     };
     if (!saveUsers(users)) { msg($("sMsg"), "Could not save. Check your browser storage settings.", false); return; }
     msg($("sMsg"), "Account created. Taking you to login…", true);
