@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Admin Panel</title>
+<style>
+  :root { --bg1:#eceffd; --bg2:#f8f6ff; --card:#fff; --text:#14183c; --muted:#6b7090; --line:#e8eaf6; --blue:#1f5bff; --blue-soft:rgba(31,91,255,.12);
+    --green:#1fa971; --red:#e5484d; --orange:#f59e0b; --purple:#7c4dff; --sh:0 8px 26px rgba(60,70,160,.09); --glass:rgba(255,255,255,.62); --glass-b:rgba(255,255,255,.85); }
+  @media (prefers-color-scheme: dark) { :root { --bg1:#12142b; --bg2:#181a38; --card:#1c1f3d; --text:#eef0ff; --muted:#9aa0d0; --line:#2c3060; --blue:#7b99ff;
+    --blue-soft:rgba(123,153,255,.16); --green:#4fd69c; --red:#ff7b80; --orange:#ffbd4a; --purple:#a98bff; --sh:0 8px 26px rgba(0,0,0,.35); --glass:rgba(28,31,61,.6); --glass-b:rgba(150,160,255,.25); } }
+  * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+  body { min-height:100vh; color:var(--text); font-family:"Inter","Segoe UI",system-ui,sans-serif; background:linear-gradient(180deg,var(--bg1),var(--bg2)) fixed;
+    padding:max(16px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) 0 max(14px,env(safe-area-inset-left)); }
+  .app { max-width:980px; margin:0 auto; padding-bottom:calc(110px + env(safe-area-inset-bottom)); }
+  button { font:inherit; color:inherit; cursor:pointer; border:0; background:none; }
+  button:focus-visible, input:focus-visible, select:focus-visible { outline:3px solid var(--blue); outline-offset:2px; }
+  [hidden] { display:none !important; }
+  svg.i { width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; flex:none; }
+  h1 { font-size:1.5rem; font-weight:800; } h2 { font-size:1.08rem; font-weight:800; margin-bottom:12px; } h3 { font-size:.95rem; margin:14px 0 8px; }
+  .top { display:flex; align-items:center; gap:12px; margin-bottom:16px; } .top .hd { flex:1; min-width:0; } .sub { color:var(--muted); font-size:.85rem; overflow-wrap:anywhere; }
+  .card { background:var(--card); border-radius:24px; box-shadow:var(--sh); padding:clamp(14px,3.5vw,22px); margin-bottom:16px; }
+  .in { width:100%; padding:11px 13px; border-radius:12px; border:1px solid var(--line); background:var(--card); color:var(--text); font:inherit; min-height:44px; }
+  .bar2 { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:12px; } .bar2 > * { flex:1 1 140px; min-width:0; }
+  .btn { padding:11px 18px; border-radius:12px; background:var(--blue); color:#fff; font-weight:800; min-height:44px; }
+  .btn.ghost { background:var(--blue-soft); color:var(--blue); } .btn.dng { background:rgba(229,72,77,.14); color:var(--red); }
+  .sbtn { padding:8px 12px; border-radius:10px; background:var(--blue-soft); color:var(--blue); font-weight:800; font-size:.8rem; min-height:36px; } .sbtn.dng { background:rgba(229,72,77,.14); color:var(--red); }
+  .pill { padding:4px 10px; border-radius:99px; font-size:.74rem; font-weight:800; flex:none; } .pill.sc { background:var(--blue-soft); color:var(--blue); }
+  .pill.pt { background:rgba(124,77,255,.16); color:var(--purple); } .pill.bl { background:rgba(229,72,77,.16); color:var(--red); } .pill.ok { background:rgba(31,169,113,.16); color:var(--green); }
+  .srow, .frow { display:flex; align-items:center; gap:10px; padding:12px 0; border-top:1px solid var(--line); flex-wrap:wrap; } .srow:first-child { border-top:0; }
+  .srow input[type=checkbox] { width:20px; height:20px; flex:none; } .tx { flex:1; min-width:140px; } .tx small { display:block; color:var(--muted); }
+  .av { width:40px; height:40px; border-radius:50%; display:grid; place-items:center; font-weight:800; color:#fff; background:linear-gradient(145deg,#6f8bff,#3b3fd8); flex:none; }
+  .cal { display:grid; grid-template-columns:repeat(7,1fr); gap:6px; max-width:460px; } .cal .dow { text-align:center; font-size:.74rem; color:var(--muted); font-weight:700; }
+  .cd { aspect-ratio:1; border-radius:12px; background:var(--bg1); font-weight:700; } .cd.P { background:rgba(31,169,113,.18); color:var(--green); } .cd.A { background:rgba(229,72,77,.16); color:var(--red); } .cd.H { background:var(--line); color:var(--muted); }
+  .stat3 { display:flex; gap:10px; margin:10px 0; flex-wrap:wrap; } .stat3 span { background:var(--bg1); padding:8px 14px; border-radius:12px; font-weight:800; font-size:.88rem; }
+  .grid2 { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-bottom:10px; }
+  .frw { display:grid; grid-template-columns:1.4fr 1fr 1.2fr auto auto; gap:8px; align-items:center; margin-bottom:8px; } .frw label { font-size:.85rem; display:flex; gap:6px; align-items:center; }
+  .ttr { display:grid; grid-template-columns:1fr 1.4fr 1fr auto; gap:8px; margin-bottom:8px; }
+  @media (max-width:560px) { .frw { grid-template-columns:1fr 1fr; } .ttr { grid-template-columns:1fr 1fr; } }
+  .bar { height:10px; border-radius:99px; background:var(--blue-soft); overflow:hidden; min-width:90px; } .bar i { display:block; height:100%; background:var(--blue); }
+  table { width:100%; border-collapse:collapse; } th, td { text-align:left; padding:10px 8px; border-top:1px solid var(--line); font-size:.92rem; } th { color:var(--muted); font-size:.78rem; border-top:0; }
+  dialog { border:0; border-radius:24px; padding:22px; width:min(520px,94vw); background:var(--card); color:var(--text); box-shadow:0 20px 60px rgba(0,0,0,.4); } dialog::backdrop { background:rgba(10,12,40,.5); }
+  .chips { display:flex; flex-wrap:wrap; gap:8px; } .chips label { display:flex; gap:6px; align-items:center; padding:8px 12px; border-radius:99px; background:var(--blue-soft); color:var(--blue); font-weight:700; font-size:.85rem; }
+  .field { display:grid; gap:5px; margin-bottom:12px; } .field label { font-weight:800; font-size:.84rem; }
+  .gate { position:fixed; inset:0; z-index:50; display:grid; place-items:center; padding:16px; background:linear-gradient(180deg,var(--bg1),var(--bg2)); }
+  .gate .card { width:min(400px,100%); } .err { color:var(--red); font-weight:700; font-size:.9rem; min-height:1.2em; margin:6px 0; }
+  .toast { position:fixed; left:50%; bottom:calc(100px + env(safe-area-inset-bottom)); transform:translateX(-50%); background:#14183c; color:#fff; padding:12px 18px; border-radius:14px; font-weight:700; font-size:.9rem; z-index:60; max-width:90vw; text-align:center; }
+  nav { position:fixed; z-index:20; left:50%; transform:translateX(-50%); bottom:calc(10px + env(safe-area-inset-bottom)); width:min(720px,calc(100% - 20px)); display:grid; grid-template-columns:repeat(6,1fr); padding:8px 6px; border-radius:26px;
+    background:var(--glass); border:1px solid var(--glass-b); -webkit-backdrop-filter:blur(20px) saturate(170%); backdrop-filter:blur(20px) saturate(170%); box-shadow:0 10px 30px rgba(40,50,140,.18); }
+  nav button { display:grid; justify-items:center; gap:3px; padding:6px 0; min-height:52px; font-size:.64rem; font-weight:600; color:var(--muted); border-radius:18px; }
+  nav button.on { color:var(--blue); font-weight:800; } nav button.on svg.i { fill:currentColor; fill-opacity:.18; }
+  @media (min-width:900px) { .app { padding-left:216px; } nav { left:16px; top:16px; bottom:16px; transform:none; width:190px; grid-template-columns:1fr; align-content:start; gap:4px; }
+    nav button { grid-auto-flow:column; justify-content:start; gap:12px; font-size:.9rem; padding:10px 14px; min-height:48px; } .toast { bottom:30px; } }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.3-5 6.5-5s5.7 1.5 6.5 5M16 4.8a3.5 3.5 0 0 1 0 6.4M18 15c2 .6 3.2 2 3.5 5"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M8 3v4M16 3v4M3.5 10h17M9 15l2 2 4-4"/></symbol>
+  <symbol id="i-rupee" viewBox="0 0 24 24"><path d="M7 5h10M7 9h10M8 5c4 0 6 1.4 6 4s-2.4 4-6 4h-1l8 6.5"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 17V11a6 6 0 0 1 12 0v6l1.5 2h-15zM10 21h4"/></symbol>
+  <symbol id="i-rank" viewBox="0 0 24 24"><path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H4v1a3 3 0 0 0 4 3M16 6h4v1a3 3 0 0 1-4 3M12 13v4M8 20h8"/></symbol>
+  <symbol id="i-out" viewBox="0 0 24 24"><path d="M9 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h4M16 8l4 4-4 4M20 12H9"/></symbol>
+</svg>
+
+<!-- ADMIN LOGIN -->
+<div class="gate" id="gate">
+  <form class="card" id="gForm">
+    <h1 style="margin-bottom:4px">Admin login</h1><p class="sub" style="margin-bottom:16px">Sign in with your admin email and password.</p>
+    <div class="field"><label for="gEmail">Email</label><input class="in" id="gEmail" type="email" autocomplete="username" required></div>
+    <div class="field"><label for="gPass">Password</label><input class="in" id="gPass" type="password" autocomplete="current-password" required></div>
+    <div class="err" id="gErr" role="alert"></div>
+    <button class="btn" style="width:100%" type="submit">Log in</button>
+  </form>
+</div>
+
+<div class="app">
+  <div class="top"><div class="hd"><h1>Admin Panel</h1><div class="sub" id="adm"></div></div><button class="sbtn" id="out">Log out</button></div>
+
+  <!-- STUDENTS -->
+  <section data-view id="v-stu">
+    <div class="card">
+      <h2>Students</h2>
+      <div class="bar2"><input class="in" id="fq" placeholder="Search name or mobile" aria-label="Search"><select class="in" id="fc" aria-label="Class"></select>
+        <select class="in" id="fr" aria-label="Role"><option value="">All roles</option><option value="student">Student</option><option value="teacher">Teacher</option></select>
+        <select class="in" id="fs" aria-label="Status"><option value="">All status</option><option value="active">Active</option><option value="blocked">Blocked</option></select></div>
+      <div class="bar2" style="align-items:center"><label style="flex:none"><input type="checkbox" id="selAll"> Select all shown</label><span class="sub" id="sCount"></span>
+        <button class="sbtn dng" data-bulk="block" style="flex:none">Block selected</button><button class="sbtn" data-bulk="unblock" style="flex:none">Unblock</button>
+        <button class="sbtn" data-bulk="teacher" style="flex:none">Make teacher</button><button class="sbtn" data-bulk="student" style="flex:none">Make student</button></div>
+      <div id="sList"></div>
+    </div>
+  </section>
+
+  <!-- ATTENDANCE -->
+  <section data-view id="v-att" hidden>
+    <div class="card"><h2>Edit one student's attendance</h2>
+      <div class="bar2"><select class="in" id="aClass" aria-label="Class"></select><select class="in" id="aStu" aria-label="Student"></select><input class="in" id="aMonth" type="month" aria-label="Month"></div>
+      <div class="stat3" id="aStat"></div><div class="cal" id="aCal"></div>
+      <p class="sub" style="margin:10px 0">Tap a day to cycle: Present, Absent, Holiday, clear.</p>
+      <button class="btn" id="aSave">Save attendance</button></div>
+    <div class="card"><h2>Mark a whole class for one day</h2>
+      <div class="bar2"><select class="in" id="bClass" aria-label="Class"></select><input class="in" id="bDate" type="date" aria-label="Date"><select class="in" id="bStatus" aria-label="Status"><option value="P">Present</option><option value="A">Absent</option><option value="H">Holiday</option></select>
+        <button class="btn" id="bApply" style="flex:none">Apply</button></div></div>
+  </section>
+
+  <!-- FEES -->
+  <section data-view id="v-fee" hidden>
+    <div class="card"><h2>Edit a student's fees</h2>
+      <div class="bar2"><select class="in" id="fClass" aria-label="Class"></select><select class="in" id="fStu" aria-label="Student"></select></div>
+      <div id="fRows"></div><div class="bar2"><button class="btn ghost" id="fAdd" style="flex:none">+ Add installment</button><button class="btn" id="fSave" style="flex:none">Save fees</button></div></div>
+    <div class="card"><h2>Add an installment to a whole class</h2>
+      <div class="grid2"><select class="in" id="fbClass" aria-label="Class"></select><input class="in" id="fbLabel" placeholder="Label e.g. Installment 3"><input class="in" id="fbAmt" type="number" min="0" placeholder="Amount"><input class="in" id="fbDue" type="date"></div>
+      <button class="btn" id="fbApply">Add to class</button></div>
+    <div class="card"><h2>Fee overview</h2><div id="fOver"></div></div>
+  </section>
+
+  <!-- TIMETABLE -->
+  <section data-view id="v-tt" hidden>
+    <div class="card"><h2>Class time table</h2><p class="sub" style="margin-bottom:10px">Only students of the selected class will see this time table.</p>
+      <div class="bar2"><select class="in" id="tClass" aria-label="Class"></select></div><div id="tGrid"></div><button class="btn" id="tSave" style="margin-top:8px">Save time table</button></div>
+  </section>
+
+  <!-- NOTICES -->
+  <section data-view id="v-not" hidden>
+    <div class="card"><h2>Post a notification</h2>
+      <div class="field"><label for="nTitle">Title</label><input class="in" id="nTitle"></div>
+      <div class="field"><label for="nBody">Message</label><textarea class="in" id="nBody" rows="3"></textarea></div>
+      <div class="bar2"><select class="in" id="nTo" aria-label="Send to"><option value="all">All students</option><option value="class">One class</option><option value="teacher">Teachers only</option></select><select class="in" id="nClass" aria-label="Class" hidden></select></div>
+      <button class="btn" id="nPost">Post</button></div>
+    <div class="card"><h2>Recent notifications</h2><div id="nList"></div></div>
+  </section>
+
+  <!-- TESTS + RANK -->
+  <section data-view id="v-tst" hidden>
+    <div class="card"><h2>Create a test</h2>
+      <div class="grid2"><input class="in" id="tsName" placeholder="Test name"><select class="in" id="tsSub" aria-label="Subject"></select><select class="in" id="tsClass" aria-label="Class"></select>
+        <input class="in" id="tsDate" type="date"><input class="in" id="tsMax" type="number" min="1" value="50" aria-label="Max marks"></div><button class="btn" id="tsAdd">Create test</button></div>
+    <div class="card"><h2>Tests</h2><div class="bar2"><select class="in" id="tfClass" aria-label="Class"></select></div><div id="tList"></div>
+      <div id="mBox" hidden><h3 id="mTitle"></h3><div id="mRows"></div><button class="btn" id="mSave">Save marks</button></div></div>
+    <div class="card"><h2>Rank board</h2><div class="bar2"><select class="in" id="rkClass" aria-label="Class"></select></div><div style="overflow-x:auto" id="rkTable"></div></div>
+  </section>
+</div>
+
+<dialog id="dlg"><form id="eForm"><h2>Edit student</h2>
+  <div class="field"><label for="eName">Student name</label><input class="in" id="eName" required></div>
+  <div class="grid2"><div class="field"><label for="eMobile">Mobile (login id)</label><input class="in" id="eMobile" readonly></div><div class="field"><label for="eDob">Date of birth (password)</label><input class="in" id="eDob" readonly></div></div>
+  <div class="field"><label for="eMail">Gmail</label><input class="in" id="eMail" type="email"></div>
+  <div class="field"><label for="eParent">Parent's name</label><input class="in" id="eParent"></div>
+  <div class="grid2"><div class="field"><label for="eClass">Class</label><select class="in" id="eClass"></select></div><div class="field"><label for="eRole">Post</label><select class="in" id="eRole"><option value="student">Student</option><option value="teacher">Teacher</option></select></div></div>
+  <div class="field"><label>Subjects</label><div class="chips" id="eSubs"></div></div>
+  <div class="bar2"><button class="btn" type="submit">Save</button><button class="btn ghost" type="button" id="eCancel">Cancel</button></div></form></dialog>
+
+<nav aria-label="Admin navigation">
+  <button data-tab="stu" class="on"><svg class="i"><use href="#i-users"/></svg>Students</button>
+  <button data-tab="att"><svg class="i"><use href="#i-cal"/></svg>Attendance</button>
+  <button data-tab="fee"><svg class="i"><use href="#i-rupee"/></svg>Fees</button>
+  <button data-tab="tt"><svg class="i"><use href="#i-clock"/></svg>Time table</button>
+  <button data-tab="not"><svg class="i"><use href="#i-bell"/></svg>Notices</button>
+  <button data-tab="tst"><svg class="i"><use href="#i-rank"/></svg>Tests &amp; Rank</button>
+</nav>
+<div class="toast" id="toast" hidden></div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, collection, getDocs, getDoc, setDoc, updateDoc, addDoc, deleteDoc, doc, query, orderBy, limit, writeBatch, serverTimestamp, arrayUnion }
+    from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDbxUTsBSeFIevnbJadEHkubyKBRHdDM94",
+    authDomain: "geniusinstitute-unnao.firebaseapp.com",
+    projectId: "geniusinstitute-unnao",
+    storageBucket: "geniusinstitute-unnao.firebasestorage.app",
+    messagingSenderId: "457602291145",
+    appId: "1:457602291145:web:678518a46dd475dd540418",
+    measurementId: "G-10RZJQMHR7"
+  };
+  const app = initializeApp(firebaseConfig), auth = getAuth(app), db = getFirestore(app);
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+  const CLASSES = ["6","7","8","9","10","11","12","Dropper"], SUBJECTS = ["Maths","Science","Physics","Chemistry","Biology","English"], DAYS = ["Mon","Tue","Wed","Thu","Fri","Sat"];
+  const inr = (n) => "₹" + Number(n || 0).toLocaleString("en-IN");
+  let students = [], tests = [], notices = [], tt;
+  const byId = (id) => students.find((s) => s.id === id);
+  const byName = (a, b) => (a.name || "").localeCompare(b.name || "");
+  const toast = (m) => { const t = $("toast"); t.textContent = m; t.hidden = false; clearTimeout(tt); tt = setTimeout(() => (t.hidden = true), 3200); };
+  const safe = (fn) => async (...a) => { try { await fn(...a); } catch (e) { toast("Error: " + (e.code || e.message)); } };
+  async function runBatch(items, fn) { for (let i = 0; i < items.length; i += 400) { const b = writeBatch(db); items.slice(i, i + 400).forEach((x) => fn(b, x)); await b.commit(); } }
+  const opts = (arr, all) => (all ? `<option value="">${all}</option>` : "") + arr.map((c) => `<option>${c}</option>`).join("");
+
+  /* ---------- login gate ---------- */
+  $("gForm").addEventListener("submit", safe(async (e) => {
+    e.preventDefault(); $("gErr").textContent = "";
+    try { await signInWithEmailAndPassword(auth, $("gEmail").value.trim(), $("gPass").value); }
+    catch (err) { $("gErr").textContent = "Wrong email or password."; }
+  }));
+  $("out").addEventListener("click", () => signOut(auth));
+  onAuthStateChanged(auth, async (u) => {
+    if (!u) { $("gate").hidden = false; return; }
+    try {
+      const a = await getDoc(doc(db, "admins", u.uid));
+      if (!a.exists()) { await signOut(auth); $("gErr").textContent = "This account is not an admin."; return; }
+    } catch (e) { await signOut(auth); $("gErr").textContent = "Could not verify admin (" + (e.code || e.message) + ")."; return; }
+    $("gate").hidden = true; $("adm").textContent = u.email;
+    await loadAll();
+  });
+
+  async function loadAll() {
+    students = (await getDocs(collection(db, "students"))).docs.map((d) => ({ id:d.id, ...d.data() }));
+    tests = (await getDocs(collection(db, "tests"))).docs.map((d) => ({ id:d.id, ...d.data() }));
+    try { notices = (await getDocs(query(collection(db, "notifications"), orderBy("createdAt", "desc"), limit(30)))).docs.map((d) => ({ id:d.id, ...d.data() })); } catch (e) { notices = []; }
+    ["fc","aClass","bClass","fClass","tfClass","rkClass"].forEach((id) => ($(id).innerHTML = opts(CLASSES, "All classes")));
+    ["fbClass","tClass","nClass","tsClass","eClass"].forEach((id) => ($(id).innerHTML = opts(CLASSES)));
+    $("tsSub").innerHTML = opts(SUBJECTS); $("rkClass").innerHTML = opts(CLASSES); $("aClass").innerHTML = opts(CLASSES); $("fClass").innerHTML = opts(CLASSES);
+    const now = new Date(); $("aMonth").value = now.toISOString().slice(0, 7); $("bDate").value = now.toISOString().slice(0, 10); $("tsDate").value = $("bDate").value;
+    renderStu(); fillStu("aStu", $("aClass").value); fillStu("fStu", $("fClass").value); loadAtt(); loadFee(); loadTT(); renderNotes(); renderTests(); renderRank(); renderFeeOver();
+  }
+  function fillStu(id, cls) { const l = students.filter((s) => !cls || s.class === cls).sort(byName); $(id).innerHTML = l.map((s) => `<option value="${s.id}">${esc(s.name)} (${esc(s.mobile)})</option>`).join("") || '<option value="">No students</option>'; }
+
+  /* ---------- tabs ---------- */
+  document.querySelectorAll("nav button").forEach((b) => b.addEventListener("click", () => {
+    document.querySelectorAll("[data-view]").forEach((s) => (s.hidden = s.id !== "v-" + b.dataset.tab));
+    document.querySelectorAll("nav button").forEach((x) => x.classList.toggle("on", x === b));
+    window.scrollTo({ top:0 });
+  }));
+
+  /* ---------- students ---------- */
+  const sel = new Set();
+  const filt = () => { const q = $("fq").value.trim().toLowerCase(), c = $("fc").value, r = $("fr").value, st = $("fs").value;
+    return students.filter((s) => (!q || (s.name || "").toLowerCase().includes(q) || (s.mobile || "").includes(q)) && (!c || s.class === c)
+      && (!r || (s.role || "student") === r) && (!st || (st === "blocked") === !!s.blocked)).sort(byName); };
+  function renderStu() {
+    const l = filt(); $("sCount").textContent = l.length + " of " + students.length + " shown · " + sel.size + " selected";
+    $("sList").innerHTML = l.map((s) => `<div class="srow"><input type="checkbox" data-chk="${s.id}" ${sel.has(s.id) ? "checked" : ""} aria-label="Select ${esc(s.name)}"><div class="av">${esc((s.name || "?").charAt(0).toUpperCase())}</div>
+      <div class="tx"><b>${esc(s.name)}</b><small>${esc(s.mobile)} · Class ${esc(s.class)}</small></div><span class="pill ${(s.role || "student") === "teacher" ? "pt" : "sc"}">${esc(s.role || "student")}</span>${s.blocked ? '<span class="pill bl">Blocked</span>' : ""}
+      <button class="sbtn" data-edit="${s.id}">Edit</button><button class="sbtn ${s.blocked ? "" : "dng"}" data-blk="${s.id}">${s.blocked ? "Unblock" : "Block"}</button></div>`).join("") || '<p class="sub">No students match.</p>';
+  }
+  ["fq","fc","fr","fs"].forEach((id) => $(id).addEventListener("input", renderStu));
+  $("selAll").addEventListener("change", (e) => { filt().forEach((s) => (e.target.checked ? sel.add(s.id) : sel.delete(s.id))); renderStu(); });
+  $("sList").addEventListener("change", (e) => { const c = e.target.dataset.chk; if (c) { e.target.checked ? sel.add(c) : sel.delete(c); renderStu(); } });
+  $("sList").addEventListener("click", safe(async (e) => {
+    const ed = e.target.closest("[data-edit]"), bk = e.target.closest("[data-blk]");
+    if (ed) openEdit(byId(ed.dataset.edit));
+    if (bk) { const s = byId(bk.dataset.blk); if (!confirm((s.blocked ? "Unblock " : "Block ") + s.name + "?")) return;
+      await updateDoc(doc(db, "students", s.id), { blocked:!s.blocked }); s.blocked = !s.blocked; renderStu(); renderFeeOver(); toast(s.blocked ? "Blocked" : "Unblocked"); }
+  }));
+  document.querySelectorAll("[data-bulk]").forEach((b) => b.addEventListener("click", safe(async () => {
+    const ids = [...sel].filter(byId); if (!ids.length) return toast("Select students first");
+    const k = b.dataset.bulk, patch = k === "block" ? { blocked:true } : k === "unblock" ? { blocked:false } : { role:k };
+    if (!confirm("Apply to " + ids.length + " student(s)?")) return;
+    await runBatch(ids, (bt, id) => bt.update(doc(db, "students", id), patch)); ids.forEach((id) => Object.assign(byId(id), patch)); renderStu(); toast("Updated " + ids.length);
+  })));
+  let editing = null;
+  function openEdit(s) {
+    editing = s; $("eName").value = s.name || ""; $("eMobile").value = s.mobile || ""; $("eDob").value = s.dob || ""; $("eMail").value = s.gmail || ""; $("eParent").value = s.parentName || "";
+    $("eClass").value = s.class || CLASSES[0]; $("eRole").value = s.role || "student";
+    $("eSubs").innerHTML = SUBJECTS.map((x) => `<label><input type="checkbox" value="${x}" ${(s.subjects || []).includes(x) ? "checked" : ""}>${x}</label>`).join(""); $("dlg").showModal();
+  }
+  $("eCancel").addEventListener("click", () => $("dlg").close());
+  $("eForm").addEventListener("submit", safe(async (e) => {
+    e.preventDefault(); const patch = { name:$("eName").value.trim(), gmail:$("eMail").value.trim().toLowerCase(), parentName:$("eParent").value.trim(), class:$("eClass").value,
+      role:$("eRole").value, subjects:[...$("eSubs").querySelectorAll("input:checked")].map((c) => c.value) };
+    await updateDoc(doc(db, "students", editing.id), patch); Object.assign(editing, patch); $("dlg").close(); renderStu(); toast("Saved");
+  }));
+
+  /* ---------- attendance ---------- */
+  let attDays = {};
+  $("aClass").addEventListener("change", () => { fillStu("aStu", $("aClass").value); loadAtt(); });
+  $("aStu").addEventListener("change", () => loadAtt()); $("aMonth").addEventListener("change", () => loadAtt());
+  const loadAtt = safe(async () => {
+    const id = $("aStu").value, m = $("aMonth").value; attDays = {};
+    if (id && m) { const s = await getDoc(doc(db, "attendance", id + "_" + m)); if (s.exists()) attDays = { ...s.data().days }; }
+    renderCal();
+  });
+  function renderCal() {
+    const m = $("aMonth").value; if (!m) return; const [y, mo] = m.split("-").map(Number), dim = new Date(y, mo, 0).getDate(), first = new Date(y, mo - 1, 1).getDay();
+    let h = ["S","M","T","W","T","F","S"].map((d) => `<div class="dow">${d}</div>`).join("") + "<span></span>".repeat(first);
+    for (let d = 1; d <= dim; d++) h += `<button class="cd ${attDays[d] || ""}" data-d="${d}">${d}</button>`;
+    $("aCal").innerHTML = h; const v = Object.values(attDays), P = v.filter((x) => x === "P").length, A = v.filter((x) => x === "A").length;
+    $("aStat").innerHTML = `<span>Present ${P}</span><span>Absent ${A}</span><span>${P + A ? Math.round(P / (P + A) * 100) : 0}%</span>`;
+  }
+  $("aCal").addEventListener("click", (e) => { const b = e.target.closest("[data-d]"); if (!b) return; const d = b.dataset.d, nx = { "":"P", P:"A", A:"H", H:"" }[attDays[d] || ""];
+    if (nx) attDays[d] = nx; else delete attDays[d]; renderCal(); });
+  $("aSave").addEventListener("click", safe(async () => { const id = $("aStu").value, m = $("aMonth").value; if (!id) return toast("Choose a student");
+    await setDoc(doc(db, "attendance", id + "_" + m), { uid:id, month:m, days:attDays }); toast("Attendance saved"); }));
+  $("bApply").addEventListener("click", safe(async () => {
+    const c = $("bClass").value, dt = $("bDate").value, st = $("bStatus").value; if (!dt) return toast("Pick a date");
+    const list = students.filter((s) => !c || s.class === c); if (!list.length) return toast("No students in that class");
+    if (!confirm("Mark " + list.length + " student(s) as " + st + " on " + dt + "?")) return;
+    const m = dt.slice(0, 7), d = String(+dt.slice(8, 10));
+    await runBatch(list, (b, s) => b.set(doc(db, "attendance", s.id + "_" + m), { uid:s.id, month:m, days:{ [d]:st } }, { merge:true })); toast("Marked " + list.length + " students"); loadAtt();
+  }));
+
+  /* ---------- fees ---------- */
+  let feeRows = [];
+  $("fClass").addEventListener("change", () => { fillStu("fStu", $("fClass").value); loadFee(); }); $("fStu").addEventListener("change", loadFee);
+  function loadFee() { const s = byId($("fStu").value); feeRows = s && s.fees ? s.fees.map((f) => ({ ...f })) : []; renderFeeRows(); }
+  function renderFeeRows() {
+    $("fRows").innerHTML = feeRows.map((f, i) => `<div class="frw" data-i="${i}"><input class="in" data-k="label" value="${esc(f.label)}" placeholder="Label"><input class="in" data-k="amt" type="number" min="0" value="${f.amt ?? ""}" placeholder="Amount">
+      <input class="in" data-k="due" type="date" value="${esc(f.due)}"><label><input type="checkbox" data-k="paid" ${f.paid ? "checked" : ""}>Paid</label><button class="sbtn dng" data-del="${i}">✕</button></div>`).join("") || '<p class="sub">No installments yet.</p>';
+  }
+  $("fRows").addEventListener("input", (e) => { const r = e.target.closest("[data-i]"); if (!r) return; const k = e.target.dataset.k; feeRows[+r.dataset.i][k] = k === "paid" ? e.target.checked : k === "amt" ? Number(e.target.value) : e.target.value; });
+  $("fRows").addEventListener("click", (e) => { const d = e.target.closest("[data-del]"); if (d) { feeRows.splice(+d.dataset.del, 1); renderFeeRows(); } });
+  $("fAdd").addEventListener("click", () => { feeRows.push({ label:"Installment " + (feeRows.length + 1), amt:0, due:"", paid:false }); renderFeeRows(); });
+  $("fSave").addEventListener("click", safe(async () => { const s = byId($("fStu").value); if (!s) return toast("Choose a student");
+    await updateDoc(doc(db, "students", s.id), { fees:feeRows }); s.fees = feeRows.map((f) => ({ ...f })); renderFeeOver(); toast("Fees saved"); }));
+  $("fbApply").addEventListener("click", safe(async () => {
+    const c = $("fbClass").value, item = { label:$("fbLabel").value.trim(), amt:Number($("fbAmt").value), due:$("fbDue").value, paid:false };
+    if (!item.label || !item.amt) return toast("Enter label and amount"); const list = students.filter((s) => s.class === c); if (!list.length) return toast("No students in Class " + c);
+    if (!confirm("Add " + item.label + " (" + inr(item.amt) + ") to " + list.length + " student(s) of Class " + c + "?")) return;
+    await runBatch(list, (b, s) => b.update(doc(db, "students", s.id), { fees:arrayUnion(item) })); list.forEach((s) => (s.fees = [...(s.fees || []), item])); renderFeeOver(); loadFee(); toast("Added to " + list.length + " students");
+  }));
+  function renderFeeOver() {
+    $("fOver").innerHTML = students.slice().sort(byName).map((s) => { const f = s.fees || [], t = f.reduce((a, x) => a + (x.amt || 0), 0), p = f.filter((x) => x.paid).reduce((a, x) => a + (x.amt || 0), 0);
+      return `<div class="frow"><div class="tx"><b>${esc(s.name)}</b><small>Class ${esc(s.class)} · ${inr(p)} of ${inr(t)} paid</small></div><div class="bar"><i style="width:${t ? p / t * 100 : 0}%"></i></div><span class="pill ${t && p >= t ? "ok" : "bl"}">${t ? (p >= t ? "Clear" : "Due " + inr(t - p)) : "No fees"}</span></div>`; }).join("") || '<p class="sub">No students.</p>';
+  }
+
+  /* ---------- time table (per class) ---------- */
+  let ttData = {};
+  $("tClass").addEventListener("change", () => loadTT());
+  const loadTT = safe(async () => { const s = await getDoc(doc(db, "timetables", $("tClass").value)); ttData = s.exists() ? JSON.parse(JSON.stringify(s.data().days || {})) : {}; renderTT(); });
+  function renderTT() {
+    $("tGrid").innerHTML = DAYS.map((d) => `<h3>${d}</h3>` + (ttData[d] || []).map((r, i) => `<div class="ttr" data-d="${d}" data-i="${i}"><input class="in" data-k="time" value="${esc(r.time)}" placeholder="4:00 PM"><input class="in" data-k="subject" list="subs" value="${esc(r.subject)}" placeholder="Subject">
+      <input class="in" data-k="room" value="${esc(r.room)}" placeholder="Room"><button class="sbtn dng" data-del="1">✕</button></div>`).join("") + `<button class="sbtn" data-add="${d}">+ Add period</button>`).join("") + `<datalist id="subs">${SUBJECTS.map((x) => `<option value="${x}">`).join("")}</datalist>`;
+  }
+  $("tGrid").addEventListener("input", (e) => { const r = e.target.closest(".ttr"); if (r) ttData[r.dataset.d][+r.dataset.i][e.target.dataset.k] = e.target.value; });
+  $("tGrid").addEventListener("click", (e) => { const a = e.target.closest("[data-add]"), d = e.target.closest("[data-del]");
+    if (a) { (ttData[a.dataset.add] ||= []).push({ time:"", subject:"", room:"" }); renderTT(); }
+    if (d) { const r = d.closest(".ttr"); ttData[r.dataset.d].splice(+r.dataset.i, 1); renderTT(); } });
+  $("tSave").addEventListener("click", safe(async () => { const c = $("tClass").value; DAYS.forEach((d) => { if (ttData[d]) ttData[d] = ttData[d].filter((r) => r.time || r.subject); });
+    await setDoc(doc(db, "timetables", c), { class:c, days:ttData, updatedAt:serverTimestamp() }); toast("Time table saved for Class " + c); }));
+
+  /* ---------- notifications ---------- */
+  $("nTo").addEventListener("change", () => ($("nClass").hidden = $("nTo").value !== "class"));
+  function renderNotes() {
+    $("nList").innerHTML = notices.map((n) => `<div class="frow"><div class="tx"><b>${esc(n.title)}</b><small>${esc(n.body)}</small><small>To: ${n.target === "class" ? "Class " + esc(n.class) : n.target === "teacher" ? "Teachers" : "All"} · ${n.createdAt && n.createdAt.toDate ? n.createdAt.toDate().toLocaleString() : ""}</small></div>
+      <button class="sbtn dng" data-nd="${n.id}">Delete</button></div>`).join("") || '<p class="sub">No notifications yet.</p>';
+  }
+  $("nPost").addEventListener("click", safe(async () => {
+    const title = $("nTitle").value.trim(), body = $("nBody").value.trim(), target = $("nTo").value; if (!title || !body) return toast("Enter a title and message");
+    const data = { title, body, target, class:target === "class" ? $("nClass").value : null, createdAt:serverTimestamp() }; const r = await addDoc(collection(db, "notifications"), data);
+    notices.unshift({ id:r.id, ...data, createdAt:{ toDate:() => new Date() } }); $("nTitle").value = $("nBody").value = ""; renderNotes(); toast("Posted");
+  }));
+  $("nList").addEventListener("click", safe(async (e) => { const b = e.target.closest("[data-nd]"); if (!b || !confirm("Delete this notification?")) return;
+    await deleteDoc(doc(db, "notifications", b.dataset.nd)); notices = notices.filter((n) => n.id !== b.dataset.nd); renderNotes(); }));
+
+  /* ---------- tests + rank ---------- */
+  let curTest = null;
+  $("tfClass").addEventListener("change", renderTests); $("rkClass").addEventListener("change", renderRank);
+  function renderTests() {
+    const c = $("tfClass").value, l = tests.filter((t) => !c || t.class === c).sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+    $("tList").innerHTML = l.map((t) => `<div class="frow"><div class="tx"><b>${esc(t.name)}</b><small>${esc(t.subject)} · Class ${esc(t.class)} · ${esc(t.date)} · max ${t.max}</small></div>
+      <button class="sbtn" data-marks="${t.id}">Marks</button><button class="sbtn dng" data-tdel="${t.id}">Delete</button></div>`).join("") || '<p class="sub">No tests.</p>';
+  }
+  $("tsAdd").addEventListener("click", safe(async () => {
+    const t = { name:$("tsName").value.trim(), subject:$("tsSub").value, class:$("tsClass").value, date:$("tsDate").value, max:Number($("tsMax").value) || 50, marks:{} };
+    if (!t.name) return toast("Enter a test name"); const r = await addDoc(collection(db, "tests"), { ...t, createdAt:serverTimestamp() }); tests.push({ id:r.id, ...t });
+    $("tsName").value = ""; renderTests(); toast("Test created");
+  }));
+  $("tList").addEventListener("click", safe(async (e) => {
+    const m = e.target.closest("[data-marks]"), d = e.target.closest("[data-tdel]");
+    if (m) { curTest = tests.find((t) => t.id === m.dataset.marks); $("mTitle").textContent = curTest.name + " · max " + curTest.max; $("mBox").hidden = false;
+      $("mRows").innerHTML = students.filter((s) => s.class === curTest.class).sort(byName).map((s) => `<div class="frow"><div class="tx"><b>${esc(s.name)}</b></div><input class="in" style="max-width:110px" type="number" min="0" max="${curTest.max}" data-s="${s.id}" value="${curTest.marks && curTest.marks[s.id] != null ? curTest.marks[s.id] : ""}" aria-label="Marks for ${esc(s.name)}"></div>`).join("") || '<p class="sub">No students in this class.</p>'; }
+    if (d && confirm("Delete this test and its marks?")) { await deleteDoc(doc(db, "tests", d.dataset.tdel)); tests = tests.filter((t) => t.id !== d.dataset.tdel); $("mBox").hidden = true; renderTests(); renderRank(); }
+  }));
+  $("mSave").addEventListener("click", safe(async () => {
+    const marks = {}; $("mRows").querySelectorAll("input").forEach((i) => { if (i.value !== "") marks[i.dataset.s] = Math.min(Number(i.value), curTest.max); });
+    await updateDoc(doc(db, "tests", curTest.id), { marks }); curTest.marks = marks; renderRank(); toast("Marks saved");
+  }));
+  function renderRank() {
+    const c = $("rkClass").value, ts = tests.filter((t) => t.class === c);
+    const rows = students.filter((s) => s.class === c).map((s) => { const sc = ts.filter((t) => t.marks && t.marks[s.id] != null).map((t) => t.marks[s.id] / t.max * 100);
+      return { s, n:sc.length, avg:sc.length ? sc.reduce((a, b) => a + b, 0) / sc.length : -1 }; }).sort((a, b) => b.avg - a.avg);
+    $("rkTable").innerHTML = rows.length ? `<table><tr><th>Rank</th><th>Student</th><th>Average</th><th>Tests</th></tr>${rows.map((r, i) => `<tr><td>${r.avg < 0 ? "-" : "#" + (i + 1)}</td><td>${esc(r.s.name)}</td><td>${r.avg < 0 ? "-" : r.avg.toFixed(1) + "%"}</td><td>${r.n}</td></tr>`).join("")}</table>` : '<p class="sub">No students in this class.</p>';
+  }
+</script>
+</body>
+</html>

@@ -242,13 +242,13 @@
 
   // 1) Paste your own config from Firebase Console > Project settings > Your apps > Web app
   const firebaseConfig = {
-  apiKey: "AIzaSyDbxUTsBSeFIevnbJadEHkubyKBRHdDM94",
-  authDomain: "geniusinstitute-unnao.firebaseapp.com",
-  projectId: "geniusinstitute-unnao",
-  storageBucket: "geniusinstitute-unnao.firebasestorage.app",
-  messagingSenderId: "457602291145",
-  appId: "1:457602291145:web:678518a46dd475dd540418",
-  measurementId: "G-10RZJQMHR7"
+    apiKey: "AIzaSyDbxUTsBSeFIevnbJadEHkubyKBRHdDM94",
+    authDomain: "geniusinstitute-unnao.firebaseapp.com",
+    projectId: "geniusinstitute-unnao",
+    storageBucket: "geniusinstitute-unnao.firebasestorage.app",
+    messagingSenderId: "457602291145",
+    appId: "1:457602291145:web:678518a46dd475dd540418",
+    measurementId: "G-10RZJQMHR7"
   };
   const HOME_PAGE = "dashboard.html";
   const EMAIL_DOMAIN = "students.institute.app"; // internal only: mobile number becomes mobile@this-domain
@@ -360,7 +360,13 @@
       const cred = await signInWithEmailAndPassword(auth, toEmail(m.value), p.value);
       mark([m, p], []);
       let name = "";
-      try { const snap = await getDoc(doc(db, "students", cred.user.uid)); if (snap.exists()) name = snap.data().name; } catch (x) {}
+      try {
+        const snap = await getDoc(doc(db, "students", cred.user.uid));
+        if (snap.exists()) {
+          if (snap.data().blocked) { await signOut(auth); msg($("lMsg"), "Your account has been blocked. Please contact the institute.", false); busy(form, false, "Log in"); return; }
+          name = snap.data().name;
+        }
+      } catch (x) {}
       msg($("lMsg"), "Welcome" + (name ? ", " + name : "") + "!", true);
       if (HOME_PAGE) setTimeout(() => { location.href = HOME_PAGE; }, 800);
     } catch (err) {
@@ -376,6 +382,7 @@
     }
     busy(form, false, "Log in");
   });
+  if (location.hash === "#blocked") msg($("lMsg"), "Your account has been blocked. Please contact the institute.", false);
 </script>
 </body>
 </html>
