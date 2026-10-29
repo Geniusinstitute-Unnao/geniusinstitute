@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Teacher Portal</title>
+<style>
+  :root { --bg1:#eceffd; --bg2:#f8f6ff; --card:#fff; --text:#14183c; --muted:#6b7090; --line:#e8eaf6; --blue:#1f5bff; --blue-soft:rgba(31,91,255,.12);
+    --green:#1fa971; --red:#e5484d; --sh:0 8px 26px rgba(60,70,160,.09); --glass:rgba(255,255,255,.62); --glass-b:rgba(255,255,255,.85); }
+  @media (prefers-color-scheme: dark) { :root { --bg1:#12142b; --bg2:#181a38; --card:#1c1f3d; --text:#eef0ff; --muted:#9aa0d0; --line:#2c3060; --blue:#7b99ff;
+    --blue-soft:rgba(123,153,255,.16); --green:#4fd69c; --red:#ff7b80; --sh:0 8px 26px rgba(0,0,0,.35); --glass:rgba(28,31,61,.6); --glass-b:rgba(150,160,255,.25); } }
+  * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+  body { min-height:100vh; color:var(--text); font-family:"Inter","Segoe UI",system-ui,sans-serif; background:linear-gradient(180deg,var(--bg1),var(--bg2)) fixed;
+    padding:max(16px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) 0 max(14px,env(safe-area-inset-left)); }
+  .app { max-width:760px; margin:0 auto; padding-bottom:calc(110px + env(safe-area-inset-bottom)); }
+  button { font:inherit; color:inherit; cursor:pointer; border:0; background:none; }
+  button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline:3px solid var(--blue); outline-offset:2px; }
+  [hidden] { display:none !important; }
+  svg.i { width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; flex:none; }
+  h1 { font-size:1.45rem; font-weight:800; } h2 { font-size:1.08rem; font-weight:800; margin-bottom:12px; }
+  .top { display:flex; align-items:center; gap:12px; margin-bottom:16px; } .top .hd { flex:1; min-width:0; } .sub { color:var(--muted); font-size:.85rem; overflow-wrap:anywhere; }
+  .card { background:var(--card); border-radius:24px; box-shadow:var(--sh); padding:clamp(14px,3.5vw,22px); margin-bottom:16px; }
+  .banner { background:rgba(229,72,77,.12); color:var(--red); border:1px solid var(--red); border-radius:16px; padding:12px 16px; font-weight:700; font-size:.9rem; margin-bottom:14px; }
+  .in { width:100%; padding:11px 13px; border-radius:12px; border:1px solid var(--line); background:var(--card); color:var(--text); font:inherit; min-height:44px; }
+  .field { display:grid; gap:5px; margin-bottom:12px; } .field label, .lbl { font-weight:800; font-size:.84rem; }
+  .bar2 { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:12px; align-items:center; } .bar2 > .in { flex:1 1 140px; min-width:0; }
+  .btn { padding:11px 18px; border-radius:12px; background:var(--blue); color:#fff; font-weight:800; min-height:44px; } .btn:disabled { opacity:.6; }
+  .btn.ghost { background:var(--blue-soft); color:var(--blue); }
+  .sbtn { padding:8px 12px; border-radius:10px; background:var(--blue-soft); color:var(--blue); font-weight:800; font-size:.8rem; min-height:36px; } .sbtn.dng { background:rgba(229,72,77,.14); color:var(--red); }
+  .chips { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; } .chips label { display:flex; gap:6px; align-items:center; padding:8px 12px; border-radius:99px; background:var(--blue-soft); color:var(--blue); font-weight:700; font-size:.85rem; cursor:pointer; }
+  .row { display:flex; align-items:center; gap:10px; padding:12px 0; border-top:1px solid var(--line); flex-wrap:wrap; } .row:first-child { border-top:0; }
+  .tx { flex:1; min-width:130px; } .tx small { display:block; color:var(--muted); overflow-wrap:anywhere; }
+  .seg { display:flex; gap:6px; } .seg button { min-width:46px; min-height:40px; border-radius:10px; font-weight:800; background:var(--bg1); }
+  .seg .P.on { background:rgba(31,169,113,.2); color:var(--green); } .seg .A.on { background:rgba(229,72,77,.18); color:var(--red); }
+  .stat3 { display:flex; gap:10px; margin:6px 0 12px; flex-wrap:wrap; } .stat3 span { background:var(--bg1); padding:8px 14px; border-radius:12px; font-weight:800; font-size:.88rem; }
+  .toast { position:fixed; left:50%; bottom:calc(100px + env(safe-area-inset-bottom)); transform:translateX(-50%); background:#14183c; color:#fff; padding:12px 18px; border-radius:14px; font-weight:700; font-size:.9rem; z-index:60; max-width:90vw; text-align:center; }
+  nav { position:fixed; z-index:20; left:50%; transform:translateX(-50%); bottom:calc(10px + env(safe-area-inset-bottom)); width:min(480px,calc(100% - 20px)); display:grid; grid-template-columns:repeat(3,1fr); padding:8px 6px; border-radius:26px;
+    background:var(--glass); border:1px solid var(--glass-b); -webkit-backdrop-filter:blur(20px) saturate(170%); backdrop-filter:blur(20px) saturate(170%); box-shadow:0 10px 30px rgba(40,50,140,.18); }
+  nav button { display:grid; justify-items:center; gap:3px; padding:6px 0; min-height:52px; font-size:.7rem; font-weight:600; color:var(--muted); border-radius:18px; }
+  nav button.on { color:var(--blue); font-weight:800; } nav button.on svg.i { fill:currentColor; fill-opacity:.18; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M8 3v4M16 3v4M3.5 10h17M9 15l2 2 4-4"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 17V11a6 6 0 0 1 12 0v6l1.5 2h-15zM10 21h4"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M5 4h9a4 4 0 0 1 4 4v12H9a4 4 0 0 1-4-4zM5 16a4 4 0 0 1 4-4h9"/></symbol>
+</svg>
+
+<div class="app">
+  <div class="banner" id="banner" role="alert" hidden></div>
+  <div class="top"><div class="hd"><h1>Teacher Portal</h1><div class="sub" id="who">Loading…</div></div><button class="sbtn" id="out">Log out</button></div>
+
+  <!-- ATTENDANCE -->
+  <section data-view id="v-att">
+    <div class="card"><h2>Mark attendance</h2>
+      <div class="bar2"><select class="in" id="aClass" aria-label="Class"></select><input class="in" id="aDate" type="date" aria-label="Date"></div>
+      <div class="bar2"><button class="sbtn" id="allP">All present</button><button class="sbtn dng" id="allA">All absent</button></div>
+      <div class="stat3" id="aStat"></div>
+      <div id="aList"></div>
+      <button class="btn" id="aSave" style="margin-top:12px">Save attendance</button>
+    </div>
+  </section>
+
+  <!-- NOTICES -->
+  <section data-view id="v-not" hidden>
+    <div class="card"><h2>Post a notice</h2>
+      <div class="field"><label for="nTitle">Title</label><input class="in" id="nTitle"></div>
+      <div class="field"><label for="nBody">Message</label><textarea class="in" id="nBody" rows="3"></textarea></div>
+      <div class="lbl" style="margin-bottom:8px">Send to classes <button class="sbtn" data-all="nCls" style="margin-left:8px">Select all</button></div>
+      <div class="chips" id="nCls"></div>
+      <button class="btn" id="nPost">Post notice</button></div>
+    <div class="card"><h2>My notices</h2><div id="nList"></div></div>
+  </section>
+
+  <!-- MATERIALS -->
+  <section data-view id="v-mat" hidden>
+    <div class="card"><h2>Upload study material</h2>
+      <div class="field"><label for="mTitle">Title</label><input class="in" id="mTitle" placeholder="e.g. Quadratic Equations - Notes"></div>
+      <div class="bar2"><select class="in" id="mSub" aria-label="Subject"></select><select class="in" id="mType" aria-label="Type"><option>Notes</option><option>Practice sheet</option><option>Video</option><option>Other</option></select></div>
+      <div class="lbl" style="margin-bottom:8px">For classes <button class="sbtn" data-all="mCls" style="margin-left:8px">Select all</button></div>
+      <div class="chips" id="mCls"></div>
+      <div class="field"><label for="mFile">Upload a file (PDF, image, doc up to 25 MB)</label><input class="in" id="mFile" type="file"></div>
+      <div class="field"><label for="mLink">Or paste a link (Google Drive, YouTube)</label><input class="in" id="mLink" type="url" placeholder="https://"></div>
+      <button class="btn" id="mPost">Upload</button></div>
+    <div class="card"><h2>My materials</h2><div id="mList"></div></div>
+  </section>
+</div>
+
+<nav aria-label="Teacher navigation">
+  <button data-tab="att" class="on"><svg class="i"><use href="#i-cal"/></svg>Attendance</button>
+  <button data-tab="not"><svg class="i"><use href="#i-bell"/></svg>Notices</button>
+  <button data-tab="mat"><svg class="i"><use href="#i-book"/></svg>Materials</button>
+</nav>
+<div class="toast" id="toast" hidden></div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, collection, getDocs, getDoc, addDoc, deleteDoc, doc, query, where, writeBatch, serverTimestamp }
+    from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDbxUTsBSeFIevnbJadEHkubyKBRHdDM94",
+    authDomain: "geniusinstitute-unnao.firebaseapp.com",
+    projectId: "geniusinstitute-unnao",
+    storageBucket: "geniusinstitute-unnao.firebasestorage.app",
+    messagingSenderId: "457602291145",
+    appId: "1:457602291145:web:678518a46dd475dd540418",
+    measurementId: "G-10RZJQMHR7"
+  };
+  const LOGIN_PAGE = "login.html";
+  const CLASSES = ["6","7","8","9","10","11","12","Dropper"], SUBJECTS = ["Maths","Science","Physics","Chemistry","Biology","English"];
+  const app = initializeApp(firebaseConfig), auth = getAuth(app), db = getFirestore(app), storage = getStorage(app);
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+  let me = null, students = [], tt;
+  const toast = (m) => { const t = $("toast"); t.textContent = m; t.hidden = false; clearTimeout(tt); tt = setTimeout(() => (t.hidden = true), 3500); };
+  const safe = (fn) => async (...a) => { try { await fn(...a); } catch (e) { toast("Error: " + (e.code || e.message)); } };
+  const classList = (c) => students.filter((s) => s.class === c && (s.role || "student") === "student" && !s.blocked).sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+  const chips = (id) => ($(id).innerHTML = CLASSES.map((c) => `<label><input type="checkbox" value="${c}">Class ${c}</label>`).join(""));
+  const picked = (id) => [...$(id).querySelectorAll("input:checked")].map((i) => i.value);
+
+  /* ---------- access: only users the admin assigned as teacher ---------- */
+  $("out").addEventListener("click", async () => { await signOut(auth); location.replace(LOGIN_PAGE); });
+  onAuthStateChanged(auth, async (u) => {
+    if (!u) { location.replace(LOGIN_PAGE); return; }
+    try {
+      const s = await getDoc(doc(db, "students", u.uid)), d = s.exists() ? s.data() : null;
+      if (!d || d.role !== "teacher" || d.blocked) { await signOut(auth); location.replace(LOGIN_PAGE + "#notteacher"); return; }
+      me = { uid:u.uid, name:d.name || "Teacher" };
+      students = (await getDocs(collection(db, "students"))).docs.map((x) => ({ id:x.id, ...x.data() }));
+    } catch (e) { $("banner").textContent = "Could not load the portal (" + (e.code || e.message) + "). Check your Firestore rules."; $("banner").hidden = false; return; }
+    $("who").textContent = "Welcome, " + me.name;
+    init();
+  });
+
+  document.querySelectorAll("nav button").forEach((b) => b.addEventListener("click", () => {
+    document.querySelectorAll("[data-view]").forEach((s) => (s.hidden = s.id !== "v-" + b.dataset.tab));
+    document.querySelectorAll("nav button").forEach((x) => x.classList.toggle("on", x === b)); window.scrollTo({ top:0 });
+  }));
+  document.querySelectorAll("[data-all]").forEach((b) => b.addEventListener("click", () => { const boxes = $(b.dataset.all).querySelectorAll("input"), all = [...boxes].every((i) => i.checked); boxes.forEach((i) => (i.checked = !all)); }));
+
+  function init() {
+    $("aClass").innerHTML = CLASSES.map((c) => `<option value="${c}">Class ${c}</option>`).join(""); $("mSub").innerHTML = SUBJECTS.map((x) => `<option>${x}</option>`).join("");
+    chips("nCls"); chips("mCls"); $("aDate").value = new Date().toISOString().slice(0, 10);
+    loadAtt(); loadMine();
+  }
+
+  /* ---------- attendance ---------- */
+  let st = {};
+  $("aClass").addEventListener("change", () => loadAtt()); $("aDate").addEventListener("change", () => loadAtt());
+  const loadAtt = safe(async () => {
+    const list = classList($("aClass").value), dt = $("aDate").value; if (!dt) return; const m = dt.slice(0, 7), d = String(+dt.slice(8, 10));
+    const docs = await Promise.all(list.map((s) => getDoc(doc(db, "attendance", s.id + "_" + m)).catch(() => null)));
+    st = {}; list.forEach((s, i) => { const v = docs[i] && docs[i].exists() && docs[i].data().days ? docs[i].data().days[d] : null; st[s.id] = v === "A" ? "A" : "P"; }); renderAtt();
+  });
+  function renderAtt() {
+    const list = classList($("aClass").value), P = list.filter((s) => st[s.id] === "P").length;
+    $("aStat").innerHTML = `<span>${list.length} students</span><span>Present ${P}</span><span>Absent ${list.length - P}</span>`;
+    $("aList").innerHTML = list.map((s) => `<div class="row"><div class="tx"><b>${esc(s.name)}</b><small>${esc(s.mobile)}</small></div><div class="seg" data-id="${s.id}">
+      <button class="P ${st[s.id] === "P" ? "on" : ""}" data-s="P" aria-label="Present">P</button><button class="A ${st[s.id] === "A" ? "on" : ""}" data-s="A" aria-label="Absent">A</button></div></div>`).join("") || '<p class="sub">No students in this class.</p>';
+  }
+  $("aList").addEventListener("click", (e) => { const b = e.target.closest("[data-s]"); if (!b) return; st[b.parentElement.dataset.id] = b.dataset.s; renderAtt(); });
+  $("allP").addEventListener("click", () => { classList($("aClass").value).forEach((s) => (st[s.id] = "P")); renderAtt(); });
+  $("allA").addEventListener("click", () => { classList($("aClass").value).forEach((s) => (st[s.id] = "A")); renderAtt(); });
+  $("aSave").addEventListener("click", safe(async () => {
+    const list = classList($("aClass").value), dt = $("aDate").value; if (!list.length) return toast("No students in this class"); if (!dt) return toast("Pick a date");
+    const m = dt.slice(0, 7), d = String(+dt.slice(8, 10)); const b = writeBatch(db);
+    list.forEach((s) => b.set(doc(db, "attendance", s.id + "_" + m), { uid:s.id, month:m, days:{ [d]:st[s.id] || "P" } }, { merge:true }));
+    await b.commit(); toast("Attendance saved for " + list.length + " students");
+  }));
+
+  /* ---------- notices ---------- */
+  let notes = [], mats = [];
+  $("nPost").addEventListener("click", safe(async () => {
+    const title = $("nTitle").value.trim(), body = $("nBody").value.trim(), cls = picked("nCls");
+    if (!title || !body) return toast("Enter a title and message"); if (!cls.length) return toast("Select at least one class");
+    const b = writeBatch(db);
+    cls.forEach((c) => b.set(doc(collection(db, "notifications")), { title, body, target:"class", class:c, by:me.uid, byName:me.name, createdAt:serverTimestamp() }));
+    await b.commit(); $("nTitle").value = $("nBody").value = ""; toast("Posted to " + cls.length + " class(es)"); loadMine();
+  }));
+  $("nList").addEventListener("click", safe(async (e) => { const b = e.target.closest("[data-d]"); if (!b || !confirm("Delete this notice?")) return; await deleteDoc(doc(db, "notifications", b.dataset.d)); loadMine(); }));
+
+  /* ---------- study materials ---------- */
+  $("mPost").addEventListener("click", safe(async () => {
+    const title = $("mTitle").value.trim(), cls = picked("mCls"), file = $("mFile").files[0], link = $("mLink").value.trim();
+    if (!title) return toast("Enter a title"); if (!cls.length) return toast("Select at least one class"); if (!file && !link) return toast("Choose a file or paste a link");
+    if (file && file.size > 25 * 1024 * 1024) return toast("File is larger than 25 MB");
+    if (!file && !/^https?:\/\//i.test(link)) return toast("The link must start with http:// or https://");
+    const btn = $("mPost"); btn.disabled = true; btn.textContent = "Uploading…";
+    try {
+      let url = link, path = null, fileName = null;
+      if (file) {
+        path = "materials/" + me.uid + "/" + Date.now() + "_" + file.name.replace(/[^\w.\-]/g, "_");
+        try { await uploadBytes(ref(storage, path), file); url = await getDownloadURL(ref(storage, path)); fileName = file.name; }
+        catch (err) { toast("File upload is not available (Firebase Storage). Paste a link instead."); return; }
+      }
+      await addDoc(collection(db, "studyMaterials"), { title, subject:$("mSub").value, type:$("mType").value, classes:cls, url, path, fileName, by:me.uid, byName:me.name, createdAt:serverTimestamp() });
+      $("mTitle").value = $("mLink").value = $("mFile").value = ""; toast("Uploaded for " + cls.length + " class(es)"); loadMine();
+    } finally { btn.disabled = false; btn.textContent = "Upload"; }
+  }));
+  $("mList").addEventListener("click", safe(async (e) => {
+    const b = e.target.closest("[data-d]"); if (!b || !confirm("Delete this material?")) return; const m = mats.find((x) => x.id === b.dataset.d);
+    if (m && m.path) { try { await deleteObject(ref(storage, m.path)); } catch (x) {} } await deleteDoc(doc(db, "studyMaterials", b.dataset.d)); loadMine();
+  }));
+
+  const loadMine = safe(async () => {
+    const mine = (c) => getDocs(query(collection(db, c), where("by", "==", me.uid)));
+    const when = (x) => (x.createdAt && x.createdAt.toMillis ? x.createdAt.toMillis() : 0);
+    notes = (await mine("notifications")).docs.map((d) => ({ id:d.id, ...d.data() })).sort((a, b) => when(b) - when(a));
+    mats = (await mine("studyMaterials")).docs.map((d) => ({ id:d.id, ...d.data() })).sort((a, b) => when(b) - when(a));
+    $("nList").innerHTML = notes.map((n) => `<div class="row"><div class="tx"><b>${esc(n.title)}</b><small>${esc(n.body)}</small><small>Class ${esc(n.class)}</small></div><button class="sbtn dng" data-d="${n.id}">Delete</button></div>`).join("") || '<p class="sub">No notices yet.</p>';
+    $("mList").innerHTML = mats.map((m) => `<div class="row"><div class="tx"><b>${esc(m.title)}</b><small>${esc(m.subject)} · ${esc(m.type)} · Class ${esc((m.classes || []).join(", "))}</small><small><a href="${esc(m.url)}" target="_blank" rel="noopener">Open</a></small></div><button class="sbtn dng" data-d="${m.id}">Delete</button></div>`).join("") || '<p class="sub">No materials yet.</p>';
+  });
+</script>
+</body>
+</html>

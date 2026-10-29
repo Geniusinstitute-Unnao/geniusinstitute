@@ -178,6 +178,20 @@
         <button class="primary" type="submit">Log in</button>
       </form>
       <p class="switch">New student? <a href="#signup" id="toSignup">Create account</a></p>
+      <p class="switch" style="margin-top:8px">Admin? <a href="#admin" id="toAdmin">Admin login</a></p>
+    </section>
+
+    <!-- ADMIN LOGIN -->
+    <section id="adminView" hidden>
+      <h1>Admin login</h1>
+      <p class="sub">Log in with your admin email and password.</p>
+      <form id="adminForm" novalidate>
+        <div class="field"><label for="aEmail">Email</label><input id="aEmail" type="email" autocomplete="username" placeholder="admin@email.com" required></div>
+        <div class="field"><label for="aPass">Password</label><input id="aPass" type="password" autocomplete="current-password" required></div>
+        <div class="msg" id="aMsg" role="status" aria-live="polite"></div>
+        <button class="primary" type="submit">Log in as admin</button>
+      </form>
+      <p class="switch">Student? <a href="#login" id="toLogin2">Student login</a></p>
     </section>
 
     <!-- SIGN UP -->
@@ -262,20 +276,22 @@
   }
 
   const $ = (id) => document.getElementById(id);
-  const loginView = $("loginView"), signupView = $("signupView");
+  const loginView = $("loginView"), signupView = $("signupView"), adminView = $("adminView");
+  const ADMIN_PAGE = "admin.html", TEACHER_PAGE = "teacher.html";
   const toEmail = (mobile) => mobile + "@" + EMAIL_DOMAIN;
 
   function show(view) {
-    const toSignup = view === "signup";
-    signupView.hidden = !toSignup;
-    loginView.hidden = toSignup;
-    $("lMsg").textContent = $("sMsg").textContent = "";
-    history.replaceState(null, "", toSignup ? "#signup" : "#login");
-    (toSignup ? $("sName") : $("lMobile")).focus();
+    signupView.hidden = view !== "signup"; loginView.hidden = view !== "login"; adminView.hidden = view !== "admin";
+    ["lMsg", "sMsg", "aMsg"].forEach((id) => ($(id).textContent = ""));
+    history.replaceState(null, "", "#" + view);
+    ({ signup:$("sName"), login:$("lMobile"), admin:$("aEmail") })[view].focus();
   }
+  $("toAdmin").addEventListener("click", (e) => { e.preventDefault(); show("admin"); });
+  $("toLogin2").addEventListener("click", (e) => { e.preventDefault(); show("login"); });
   $("toSignup").addEventListener("click", (e) => { e.preventDefault(); show("signup"); });
   $("toLogin").addEventListener("click", (e) => { e.preventDefault(); show("login"); });
   if (location.hash === "#signup") { signupView.hidden = false; loginView.hidden = true; }
+  if (location.hash === "#admin") { adminView.hidden = false; loginView.hidden = true; }
 
   ["lMobile", "sMobile"].forEach((id) => $(id).addEventListener("input", (e) => {
     e.target.value = e.target.value.replace(/\D/g, "").slice(0, 10);
@@ -347,6 +363,24 @@
     }
   });
 
+  async function isAdmin(uid) { try { return (await getDoc(doc(db, "admins", uid))).exists(); } catch (e) { return false; } }
+
+  $("adminForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const form = e.target, em = $("aEmail").value.trim(), pw = $("aPass").value;
+    if (!em || !pw) { msg($("aMsg"), "Enter your admin email and password.", false); return; }
+    if (!configured) { msg($("aMsg"), NOT_SET, false); return; }
+    busy(form, true, "Log in as admin");
+    try {
+      const cred = await signInWithEmailAndPassword(auth, em, pw);
+      if (!(await isAdmin(cred.user.uid))) { await signOut(auth); msg($("aMsg"), "This account is not an admin.", false); }
+      else { msg($("aMsg"), "Welcome, admin!", true); setTimeout(() => { location.href = ADMIN_PAGE; }, 600); return; }
+    } catch (err) {
+      msg($("aMsg"), err.code === "auth/network-request-failed" ? "No internet connection." : "Wrong email or password.", false);
+    }
+    busy(form, false, "Log in as admin");
+  });
+
   $("loginForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const form = e.target, m = $("lMobile"), p = $("lPass");
@@ -359,11 +393,13 @@
     try {
       const cred = await signInWithEmailAndPassword(auth, toEmail(m.value), p.value);
       mark([m, p], []);
+      if (await isAdmin(cred.user.uid)) { msg($("lMsg"), "Welcome, admin!", true); setTimeout(() => { location.href = ADMIN_PAGE; }, 600); return; }
       let name = "";
       try {
         const snap = await getDoc(doc(db, "students", cred.user.uid));
         if (snap.exists()) {
           if (snap.data().blocked) { await signOut(auth); msg($("lMsg"), "Your account has been blocked. Please contact the institute.", false); busy(form, false, "Log in"); return; }
+          if (snap.data().role === "teacher") { msg($("lMsg"), "Welcome, " + snap.data().name + "!", true); setTimeout(() => { location.href = TEACHER_PAGE; }, 600); return; }
           name = snap.data().name;
         }
       } catch (x) {}
@@ -382,6 +418,7 @@
     }
     busy(form, false, "Log in");
   });
+  if (location.hash === "#notteacher") msg($("lMsg"), "This account is not a teacher. Ask the admin to assign you the teacher post.", false);
   if (location.hash === "#blocked") msg($("lMsg"), "Your account has been blocked. Please contact the institute.", false);
 </script>
 </body>
