@@ -33,6 +33,10 @@
   .seg { display:flex; gap:6px; } .seg button { min-width:46px; min-height:40px; border-radius:10px; font-weight:800; background:var(--bg1); }
   .seg .P.on { background:rgba(31,169,113,.2); color:var(--green); } .seg .A.on { background:rgba(229,72,77,.18); color:var(--red); }
   .stat3 { display:flex; gap:10px; margin:6px 0 12px; flex-wrap:wrap; } .stat3 span { background:var(--bg1); padding:8px 14px; border-radius:12px; font-weight:800; font-size:.88rem; }
+  .lockbar { display:flex; align-items:center; flex-wrap:wrap; gap:10px; padding:14px 16px; border-radius:16px; margin:4px 0 14px; font-weight:700; }
+  .lockbar .t { flex:1; min-width:200px; } .lockbar.open { background:var(--blue-soft); color:var(--blue); }
+  .lockbar.locked { background:rgba(245,158,11,.16); color:var(--orange); } .lockbar.edit { background:rgba(229,72,77,.12); color:var(--red); }
+  .pill { padding:4px 11px; border-radius:99px; font-size:.78rem; font-weight:800; flex:none; } .pill.ok { background:rgba(31,169,113,.16); color:var(--green); } .pill.bl { background:rgba(229,72,77,.15); color:var(--red); }
   .toast { position:fixed; left:50%; bottom:calc(100px + env(safe-area-inset-bottom)); transform:translateX(-50%); background:#14183c; color:#fff; padding:12px 18px; border-radius:14px; font-weight:700; font-size:.9rem; z-index:60; max-width:90vw; text-align:center; }
   nav { position:fixed; z-index:20; left:50%; transform:translateX(-50%); bottom:calc(10px + env(safe-area-inset-bottom)); width:min(480px,calc(100% - 20px)); display:grid; grid-template-columns:repeat(3,1fr); padding:8px 6px; border-radius:26px;
     background:var(--glass); border:1px solid var(--glass-b); -webkit-backdrop-filter:blur(20px) saturate(170%); backdrop-filter:blur(20px) saturate(170%); box-shadow:0 10px 30px rgba(40,50,140,.18); }
@@ -55,7 +59,8 @@
   <section data-view id="v-att">
     <div class="card"><h2>Mark attendance</h2>
       <div class="bar2"><select class="in" id="aClass" aria-label="Class"></select><input class="in" id="aDate" type="date" aria-label="Date"></div>
-      <div class="bar2"><button class="sbtn" id="allP">All present</button><button class="sbtn dng" id="allA">All absent</button></div>
+      <div class="lockbar" id="aBanner" role="status"></div>
+      <div class="bar2" id="aTools"><button class="sbtn" id="allP">All present</button><button class="sbtn dng" id="allA">All absent</button></div>
       <div class="stat3" id="aStat"></div>
       <div id="aList"></div>
       <button class="btn" id="aSave" style="margin-top:12px">Save attendance</button>
@@ -97,7 +102,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-  import { getFirestore, collection, getDocs, getDoc, addDoc, deleteDoc, doc, query, where, writeBatch, serverTimestamp }
+  import { getFirestore, collection, getDocs, getDoc, setDoc, addDoc, deleteDoc, doc, query, where, writeBatch, serverTimestamp }
     from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
   import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
@@ -148,28 +153,43 @@
     loadAtt(); loadMine();
   }
 
-  /* ---------- attendance ---------- */
-  let st = {};
+  /* ---------- attendance (saved once per day, then locked) ---------- */
+  let st = {}, lock = null, editing = false;
+  const fmtT = (ts) => (ts && ts.toDate ? ts.toDate().toLocaleString() : "");
   $("aClass").addEventListener("change", () => loadAtt()); $("aDate").addEventListener("change", () => loadAtt());
   const loadAtt = safe(async () => {
-    const list = classList($("aClass").value), dt = $("aDate").value; if (!dt) return; const m = dt.slice(0, 7), d = String(+dt.slice(8, 10));
-    const docs = await Promise.all(list.map((s) => getDoc(doc(db, "attendance", s.id + "_" + m)).catch(() => null)));
-    st = {}; list.forEach((s, i) => { const v = docs[i] && docs[i].exists() && docs[i].data().days ? docs[i].data().days[d] : null; st[s.id] = v === "A" ? "A" : "P"; }); renderAtt();
+    const c = $("aClass").value, list = classList(c), dt = $("aDate").value; if (!dt) return; const m = dt.slice(0, 7), d = String(+dt.slice(8, 10));
+    const res = await Promise.all([getDoc(doc(db, "attendanceLocks", c + "_" + dt)).catch(() => null), ...list.map((s) => getDoc(doc(db, "attendance", s.id + "_" + m)).catch(() => null))]);
+    lock = res[0] && res[0].exists() ? res[0].data() : null; editing = false; st = {};
+    list.forEach((s, i) => { const r = res[i + 1], v = r && r.exists() && r.data().days ? r.data().days[d] : null; st[s.id] = v === "A" || v === "H" ? v : "P"; }); renderAtt();
   });
   function renderAtt() {
-    const list = classList($("aClass").value), P = list.filter((s) => st[s.id] === "P").length;
-    $("aStat").innerHTML = `<span>${list.length} students</span><span>Present ${P}</span><span>Absent ${list.length - P}</span>`;
-    $("aList").innerHTML = list.map((s) => `<div class="row"><div class="tx"><b>${esc(s.name)}</b><small>${esc(s.mobile)}</small></div><div class="seg" data-id="${s.id}">
-      <button class="P ${st[s.id] === "P" ? "on" : ""}" data-s="P" aria-label="Present">P</button><button class="A ${st[s.id] === "A" ? "on" : ""}" data-s="A" aria-label="Absent">A</button></div></div>`).join("") || '<p class="sub">No students in this class.</p>';
+    const list = classList($("aClass").value), P = list.filter((s) => st[s.id] === "P").length, locked = !!lock && !editing, b = $("aBanner"), W = { P:"Present", A:"Absent", H:"Holiday" };
+    if (!lock) { b.className = "lockbar open"; b.innerHTML = '<span class="t">Not marked yet. Mark every student, then tap Save. After saving, this day is locked.</span>'; }
+    else if (!editing) { b.className = "lockbar locked"; b.innerHTML = `<span class="t">🔒 Locked. Saved by ${esc(lock.byName || "someone")} on ${esc(fmtT(lock.at))}${lock.edited ? " · last edited by " + esc(lock.editedByName || "someone") : ""}.</span><button class="btn sbtn" id="aEdit">Edit</button>`; }
+    else { b.className = "lockbar edit"; b.innerHTML = '<span class="t">✏️ Editing a saved day. Nothing changes until you tap Save.</span><button class="sbtn" id="aCancel">Cancel</button>'; }
+    $("aTools").hidden = locked; $("aSave").hidden = locked;
+    $("aStat").innerHTML = `<span>${list.length} students</span><span>Present ${P}</span><span>Absent ${list.filter((s) => st[s.id] === "A").length}</span>`;
+    $("aList").innerHTML = list.map((s) => `<div class="row"><div class="tx"><b>${esc(s.name)}</b><small>${esc(s.mobile)}</small></div>` + (locked
+      ? `<span class="pill ${st[s.id] === "P" ? "ok" : st[s.id] === "A" ? "bl" : ""}">${W[st[s.id]]}</span>`
+      : `<div class="seg" data-id="${s.id}"><button class="P ${st[s.id] === "P" ? "on" : ""}" data-s="P" aria-label="Present">P</button><button class="A ${st[s.id] === "A" ? "on" : ""}" data-s="A" aria-label="Absent">A</button></div>`) + `</div>`).join("") || '<p class="sub">No students in this class.</p>';
   }
+  $("aBanner").addEventListener("click", (e) => {
+    if (e.target.closest("#aEdit")) { if (confirm("Edit the saved attendance for Class " + $("aClass").value + " on " + $("aDate").value + "?\nUse this only to correct a mistake.")) { editing = true; renderAtt(); } }
+    if (e.target.closest("#aCancel")) loadAtt();
+  });
   $("aList").addEventListener("click", (e) => { const b = e.target.closest("[data-s]"); if (!b) return; st[b.parentElement.dataset.id] = b.dataset.s; renderAtt(); });
   $("allP").addEventListener("click", () => { classList($("aClass").value).forEach((s) => (st[s.id] = "P")); renderAtt(); });
   $("allA").addEventListener("click", () => { classList($("aClass").value).forEach((s) => (st[s.id] = "A")); renderAtt(); });
   $("aSave").addEventListener("click", safe(async () => {
-    const list = classList($("aClass").value), dt = $("aDate").value; if (!list.length) return toast("No students in this class"); if (!dt) return toast("Pick a date");
-    const m = dt.slice(0, 7), d = String(+dt.slice(8, 10)); const b = writeBatch(db);
+    const c = $("aClass").value, list = classList(c), dt = $("aDate").value; if (!list.length) return toast("No students in this class"); if (!dt) return toast("Pick a date");
+    const lockRef = doc(db, "attendanceLocks", c + "_" + dt), cur = await getDoc(lockRef);
+    if (cur.exists() && !editing) { toast("This day was just saved by " + (cur.data().byName || "someone else") + ". Showing the saved attendance."); await loadAtt(); return; }
+    const m = dt.slice(0, 7), d = String(+dt.slice(8, 10)), b = writeBatch(db);
     list.forEach((s) => b.set(doc(db, "attendance", s.id + "_" + m), { uid:s.id, month:m, days:{ [d]:st[s.id] || "P" } }, { merge:true }));
-    await b.commit(); toast("Attendance saved for " + list.length + " students");
+    await b.commit();
+    await setDoc(lockRef, cur.exists() ? { edited:true, editedByName:me.name, editedAt:serverTimestamp() } : { class:c, date:dt, by:me.uid, byName:me.name, at:serverTimestamp(), edited:false }, { merge:true });
+    toast("Attendance saved and locked"); await loadAtt();
   }));
 
   /* ---------- notices ---------- */
