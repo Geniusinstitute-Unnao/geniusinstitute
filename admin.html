@@ -135,6 +135,7 @@
   <section data-view id="v-home">
     <div class="ph"><h2>Welcome</h2><p>Pick what you want to do. Everything here is saved to your Firebase project instantly.</p></div>
     <div class="stats" id="hStats"></div>
+    <div class="card"><h3>Pending fees</h3><p class="hint">Worked out automatically from each class's fee plan, each student's subjects and their monthly due date.</p><div id="hDues"></div></div>
     <div class="tasks">
       <button class="task" data-go="stu"><span class="ic"><svg class="i"><use href="#i-users"/></svg></span><span><b>Manage students</b><small>Search, edit, block, make a teacher</small></span></button>
       <button class="task" data-go="att"><span class="ic"><svg class="i"><use href="#i-cal"/></svg></span><span><b>Mark attendance</b><small>A whole class for a day, or one student</small></span></button>
@@ -184,18 +185,44 @@
 
   <!-- FEES -->
   <section data-view id="v-fee" hidden>
-    <div class="ph"><h2>Fees</h2><p>See who has dues. Tap <b>Edit fees</b> to change a student's installments.</p></div>
-    <div class="card">
-      <div class="row2">
-        <div class="field" style="margin:0"><label for="ffq">Search</label><input class="in" id="ffq" placeholder="Name or mobile"></div>
-        <div class="field" style="margin:0"><label for="ffc">Class</label><select class="in" id="ffc"></select></div>
-        <div class="field" style="margin:0"><label for="ffs">Show</label><select class="in" id="ffs"><option value="">Everyone</option><option value="due">Has dues</option><option value="clear">Fully paid</option><option value="none">No fees set</option></select></div>
-      </div><div id="fOver"></div>
+    <div class="ph"><h2>Fees</h2><p>Set a monthly fee for every subject in every class. A student pays the total of the subjects they chose. The first month is paid when the account is created, and the next fee falls due on the same date every month.</p></div>
+    <div class="segc" id="feeMode"><button data-m="dues" class="on">Monthly dues</button><button data-m="plan">Fee plan</button><button data-m="once">One-time fees</button></div>
+
+    <div id="fm-dues">
+      <div class="card">
+        <div class="row2">
+          <div class="field" style="margin:0"><label for="mq">Search</label><input class="in" id="mq" placeholder="Name or mobile"></div>
+          <div class="field" style="margin:0"><label for="mc">Class</label><select class="in" id="mc"></select></div>
+          <div class="field" style="margin:0"><label for="ms">Show</label><select class="in" id="ms"><option value="pending">Pending fees</option><option value="ok">Up to date</option><option value="noplan">No fee plan</option><option value="all">Everyone</option></select></div>
+        </div>
+        <div class="lockbar open"><span class="t">Reminders go out automatically on each due date, the next time this panel is opened. You can also send them now.</span><button class="btn s" id="remindNow">Send reminders now</button></div>
+        <div id="dueList"></div>
+      </div>
     </div>
-    <div class="card"><h3>Add an installment to a whole class</h3><p class="hint">For example, add "Installment 3" of ₹12,500 for every student in Class 10.</p>
-      <div class="row2"><div class="field" style="margin:0"><label for="fbClass">Class</label><select class="in" id="fbClass"></select></div><div class="field" style="margin:0"><label for="fbLabel">Name</label><input class="in" id="fbLabel" placeholder="Installment 3"></div>
-        <div class="field" style="margin:0"><label for="fbAmt">Amount (₹)</label><input class="in" id="fbAmt" type="number" min="0"></div><div class="field" style="margin:0"><label for="fbDue">Due date</label><input class="in" id="fbDue" type="date"></div></div>
-      <button class="btn" id="fbApply">Add to every student in this class</button></div>
+
+    <div id="fm-plan" hidden>
+      <div class="card">
+        <div class="stp">Step 1 · Choose class</div><div class="segc" id="planClasses"></div>
+        <div class="stp">Step 2 · Monthly fee for each subject in <span id="planName"></span></div>
+        <div id="planRows"></div><p class="sub" id="planNote" style="margin-top:8px"></p>
+        <div class="stp" style="margin-top:14px">Step 3 · Save</div>
+        <div class="btns"><button class="btn" id="planSave">Save fee plan</button><button class="btn soft" id="planAll">Copy these prices to all classes</button></div>
+      </div>
+    </div>
+
+    <div id="fm-once" hidden>
+      <div class="card"><h3>One-time fees</h3><p class="hint">Use this for extra charges such as exam or book fees. These are separate from the monthly fee.</p>
+        <div class="row2">
+          <div class="field" style="margin:0"><label for="ffq">Search</label><input class="in" id="ffq" placeholder="Name or mobile"></div>
+          <div class="field" style="margin:0"><label for="ffc">Class</label><select class="in" id="ffc"></select></div>
+          <div class="field" style="margin:0"><label for="ffs">Show</label><select class="in" id="ffs"><option value="">Everyone</option><option value="due">Has dues</option><option value="clear">Fully paid</option><option value="none">No fees set</option></select></div>
+        </div><div id="fOver"></div>
+      </div>
+      <div class="card"><h3>Add a one-time fee to a whole class</h3><p class="hint">For example, add "Exam fee" of ₹500 for every student in Class 10.</p>
+        <div class="row2"><div class="field" style="margin:0"><label for="fbClass">Class</label><select class="in" id="fbClass"></select></div><div class="field" style="margin:0"><label for="fbLabel">Name</label><input class="in" id="fbLabel" placeholder="Exam fee"></div>
+          <div class="field" style="margin:0"><label for="fbAmt">Amount (₹)</label><input class="in" id="fbAmt" type="number" min="0"></div><div class="field" style="margin:0"><label for="fbDue">Due date</label><input class="in" id="fbDue" type="date"></div></div>
+        <button class="btn" id="fbApply">Add to every student in this class</button></div>
+    </div>
   </section>
 
   <!-- TIMETABLE -->
@@ -242,12 +269,13 @@
     <div class="row2"><div class="field" style="margin:0"><label for="eMobile">Mobile (login ID, cannot change)</label><input class="in" id="eMobile" readonly></div><div class="field" style="margin:0"><label for="eDob">Date of birth (password)</label><input class="in" id="eDob" readonly></div></div>
     <div class="field"><label for="eMail">Gmail</label><input class="in" id="eMail" type="email"></div>
     <div class="field"><label for="eParent">Parent's name</label><input class="in" id="eParent"></div>
+    <div class="field"><label for="eJoin">Joining date (the monthly fee is due on this date every month)</label><input class="in" id="eJoin" type="date"></div>
     <div class="row2"><div class="field" style="margin:0"><label for="eClass">Class</label><select class="in" id="eClass"></select></div>
       <div class="field" style="margin:0"><label for="eRole">Post</label><select class="in" id="eRole"><option value="student">Student</option><option value="teacher">Teacher</option></select></div></div>
     <div class="field"><label>Subjects</label><div class="chips" id="eSubs" style="margin:0"></div></div>
     <button class="btn" type="submit" style="width:100%">Save changes</button>
   </form>
-  <div class="sect"><h4>Quick actions</h4><div class="btns"><button class="btn soft" id="eFees">Edit this student's fees</button><button class="btn soft" id="eAtt">Edit this student's attendance</button></div></div>
+  <div class="sect"><h4>Quick actions</h4><div class="btns"><button class="btn soft" id="eFees">Open monthly fees</button><button class="btn soft" id="eAtt">Edit this student's attendance</button></div></div>
   <div class="sect"><h4 id="eBlkT">Block this student</h4><p id="eBlkP">A blocked student cannot log in until you unblock them.</p><button class="btn dng" id="eBlk">Block</button></div>
 </div></dialog>
 
@@ -255,6 +283,10 @@
 <dialog id="dFee"><div class="dbody"><div class="dhead"><h3 id="feeTitle">Fees</h3><button class="x" id="feeX" aria-label="Close">✕</button></div>
   <p class="sub" style="margin-bottom:12px">Each row is one installment. Tick <b>Paid</b> once the money is received.</p>
   <div id="fRows"></div><div class="btns"><button class="btn soft" id="fAdd">+ Add installment</button><button class="btn" id="fSave">Save fees</button></div></div></dialog>
+
+<!-- MONTHLY PAYMENT DIALOG -->
+<dialog id="dPay"><div class="dbody"><div class="dhead"><h3 id="payTitle">Monthly fee</h3><button class="x" id="payX" aria-label="Close">✕</button></div>
+  <p class="sub" id="paySub" style="margin-bottom:12px"></p><div id="payRows"></div><div class="btns" style="margin-top:14px"><button class="btn" id="payAll">Mark all pending as paid</button></div></div></dialog>
 
 <!-- NEW TEST DIALOG -->
 <dialog id="dNew"><div class="dbody"><div class="dhead"><h3>New test</h3><button class="x" id="newX" aria-label="Close">✕</button></div>
@@ -275,7 +307,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-  import { getFirestore, collection, getDocs, getDoc, setDoc, updateDoc, addDoc, deleteDoc, doc, query, orderBy, limit, writeBatch, serverTimestamp, arrayUnion }
+  import { getFirestore, collection, getDocs, getDoc, setDoc, updateDoc, addDoc, deleteDoc, doc, query, orderBy, limit, writeBatch, serverTimestamp, arrayUnion, deleteField }
     from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -297,12 +329,12 @@
   const byName = (a, b) => (a.name || "").localeCompare(b.name || "");
   const toast = (m) => { const t = $("toast"); t.textContent = m; t.hidden = false; clearTimeout(tt); tt = setTimeout(() => (t.hidden = true), 3500); };
   const safe = (fn) => async (...a) => { try { await fn(...a); } catch (e) { toast("Something went wrong: " + (e.code || e.message)); } };
-  async function runBatch(items, fn) { for (let i = 0; i < items.length; i += 400) { const b = writeBatch(db); items.slice(i, i + 400).forEach((x) => fn(b, x)); await b.commit(); } }
+  async function runBatch(items, fn, size = 400) { for (let i = 0; i < items.length; i += size) { const b = writeBatch(db); items.slice(i, i + size).forEach((x) => fn(b, x)); await b.commit(); } }
   const opts = (arr, all) => (all ? `<option value="">${all}</option>` : "") + arr.map((c) => `<option value="${c}">Class ${c}</option>`).join("");
   const pickedIn = (id) => [...$(id).querySelectorAll("input:checked")].map((c) => c.value);
   const seg = (id, fn) => $(id).addEventListener("click", (e) => { const b = e.target.closest("button"); if (!b) return; $(id).querySelectorAll("button").forEach((x) => x.classList.toggle("on", x === b)); fn(b); });
   const closeBtn = (btn, dlg) => $(btn).addEventListener("click", () => $(dlg).close());
-  ["eX:dStu","feeX:dFee","newX:dNew","mX:dMarks"].forEach((p) => closeBtn(...p.split(":")));
+  ["eX:dStu","feeX:dFee","newX:dNew","mX:dMarks","payX:dPay"].forEach((p) => closeBtn(...p.split(":")));
 
   /* ---------- admin login ---------- */
   $("gForm").addEventListener("submit", async (e) => { e.preventDefault(); $("gErr").textContent = "";
@@ -319,13 +351,15 @@
     students = (await getDocs(collection(db, "students"))).docs.map((d) => ({ id:d.id, ...d.data() }));
     tests = (await getDocs(collection(db, "tests"))).docs.map((d) => ({ id:d.id, ...d.data() }));
     try { notices = (await getDocs(query(collection(db, "notifications"), orderBy("createdAt", "desc"), limit(30)))).docs.map((d) => ({ id:d.id, ...d.data() })); } catch (e) { notices = []; }
-    ["fc","ffc","tfClass"].forEach((id) => ($(id).innerHTML = opts(CLASSES, "All classes")));
+    try { plans = Object.fromEntries((await getDocs(collection(db, "feeStructure"))).docs.map((d) => [d.id, d.data()])); } catch (e) { plans = {}; }
+    ["fc","ffc","tfClass","mc"].forEach((id) => ($(id).innerHTML = opts(CLASSES, "All classes")));
     ["dClass","aClass","fbClass","tsClass","rkClass","eClass"].forEach((id) => ($(id).innerHTML = opts(CLASSES)));
     $("tsSub").innerHTML = SUBJECTS.map((x) => `<option>${x}</option>`).join("");
     $("ttClasses").innerHTML = CLASSES.map((c, i) => `<button data-c="${c}" class="${i ? "" : "on"}">Class ${c}</button>`).join("");
+    $("planClasses").innerHTML = CLASSES.map((c, i) => `<button data-c="${c}" class="${i ? "" : "on"}">Class ${c}</button>`).join("");
     $("nCls").innerHTML = CLASSES.map((c) => `<label><input type="checkbox" value="${c}">Class ${c}</label>`).join("");
     const today = new Date().toISOString().slice(0, 10); $("dDate").value = today; $("aMonth").value = today.slice(0, 7); $("tsDate").value = today;
-    renderHome(); renderStu(); renderFeeOver(); renderNotes(); renderTests(); renderRank(); loadDay(); fillStu(); loadAtt(); loadTT();
+    renderHome(); renderStu(); renderFeeOver(); renderDues(); renderPlan(); renderNotes(); renderTests(); renderRank(); loadDay(); fillStu(); loadAtt(); loadTT(); autoReminders(false);
   }
   function fillStu() { const c = $("aClass").value, l = students.filter((s) => s.class === c).sort(byName);
     $("aStu").innerHTML = l.map((s) => `<option value="${s.id}">${esc(s.name)} (${esc(s.mobile)})</option>`).join("") || '<option value="">No students in this class</option>'; }
@@ -341,10 +375,15 @@
 
   /* ---------- home ---------- */
   function renderHome() {
-    const st = students.filter((s) => (s.role || "student") === "student").length, te = students.filter((s) => s.role === "teacher").length, bl = students.filter((s) => s.blocked).length;
-    const due = students.reduce((a, s) => a + (s.fees || []).filter((f) => !f.paid).reduce((x, f) => x + (f.amt || 0), 0), 0);
-    $("hStats").innerHTML = [[st, "Students"], [te, "Teachers"], [bl, "Blocked"], [inr(due), "Fees pending"]].map((x) => `<div class="stat"><b>${x[0]}</b><span>${x[1]}</span></div>`).join("");
+    const stu = students.filter(isStu), te = students.filter((s) => s.role === "teacher").length, bl = students.filter((s) => s.blocked).length;
+    const rows = stu.map((s) => ({ s, p:pend(s) })).filter((r) => r.p.amt > 0).sort((a, b) => b.p.amt - a.p.amt), total = rows.reduce((a, r) => a + r.p.amt, 0);
+    $("hStats").innerHTML = [[stu.length, "Students"], [te, "Teachers"], [bl, "Blocked"], [inr(total), "Fees pending"], [rows.length, "Students with dues"]].map((x) => `<div class="stat"><b>${x[0]}</b><span>${x[1]}</span></div>`).join("");
+    const none = !Object.keys(plans).length ? '<p class="empty">No fee plan is set yet. Go to <b>Fees → Fee plan</b> and enter the monthly fee for each subject.</p>' : '<p class="empty">🎉 No pending fees right now.</p>';
+    $("hDues").innerHTML = rows.slice(0, 8).map((r) => `<div class="item"><div class="av">${esc((r.s.name || "?").charAt(0).toUpperCase())}</div><div class="tx"><b>${esc(r.s.name)}</b>
+      <small>Class ${esc(r.s.class)} · ${r.p.cyc.length ? r.p.cyc.length + " month(s) pending" : ""}${r.p.cyc.length && r.p.once ? " + " : ""}${r.p.once ? "one-time fees" : ""}</small></div><span class="pill wn">${inr(r.p.amt)}</span>
+      <button class="btn soft s" data-pay="${r.s.id}">${r.p.cyc.length ? "Collect" : "Open"}</button></div>`).join("") + (rows.length > 8 ? '<div style="margin-top:12px"><button class="btn soft s" data-go="fee">View all ' + rows.length + ' students with dues</button></div>' : "") || none;
   }
+  $("hDues").addEventListener("click", (e) => { const b = e.target.closest("[data-pay]"); if (!b) return; const s = byId(b.dataset.pay); if (pend(s).cyc.length) openPay(s.id); else openFees(s.id); });
 
   /* ---------- students ---------- */
   const sel = new Set();
@@ -373,7 +412,7 @@
   let cur = null;
   function openStu(s) {
     cur = s; $("eTitle").textContent = s.name || "Student"; $("eName").value = s.name || ""; $("eMobile").value = s.mobile || ""; $("eDob").value = s.dob || ""; $("eMail").value = s.gmail || "";
-    $("eParent").value = s.parentName || ""; $("eClass").value = s.class || CLASSES[0]; $("eRole").value = s.role || "student";
+    $("eParent").value = s.parentName || ""; { const j = joinedD(s); $("eJoin").value = j && !isNaN(j) ? ymd(j) : ""; } $("eClass").value = s.class || CLASSES[0]; $("eRole").value = s.role || "student";
     $("eSubs").innerHTML = SUBJECTS.map((x) => `<label><input type="checkbox" value="${x}" ${(s.subjects || []).includes(x) ? "checked" : ""}>${x}</label>`).join("");
     $("eBlkT").textContent = s.blocked ? "This student is blocked" : "Block this student";
     $("eBlkP").textContent = s.blocked ? "They cannot log in right now. Unblock to let them back in." : "A blocked student cannot log in until you unblock them.";
@@ -381,10 +420,11 @@
   }
   $("eForm").addEventListener("submit", safe(async (e) => { e.preventDefault();
     const patch = { name:$("eName").value.trim(), gmail:$("eMail").value.trim().toLowerCase(), parentName:$("eParent").value.trim(), class:$("eClass").value, role:$("eRole").value, subjects:pickedIn("eSubs") };
-    await updateDoc(doc(db, "students", cur.id), patch); Object.assign(cur, patch); $("dStu").close(); renderStu(); renderHome(); toast("Saved"); }));
+    if ($("eJoin").value) patch.joinedOn = $("eJoin").value;
+    await updateDoc(doc(db, "students", cur.id), patch); Object.assign(cur, patch); $("dStu").close(); renderStu(); renderHome(); renderDues(); toast("Saved"); }));
   $("eBlk").addEventListener("click", safe(async () => { if (!confirm((cur.blocked ? "Unblock " : "Block ") + cur.name + "?")) return;
     await updateDoc(doc(db, "students", cur.id), { blocked:!cur.blocked }); cur.blocked = !cur.blocked; $("dStu").close(); renderStu(); renderHome(); toast(cur.blocked ? "Student blocked" : "Student unblocked"); }));
-  $("eFees").addEventListener("click", () => { $("dStu").close(); openFees(cur.id); });
+  $("eFees").addEventListener("click", () => { $("dStu").close(); go("fee"); openPay(cur.id); });
   $("eAtt").addEventListener("click", safe(async () => { $("dStu").close(); go("att"); $("attMode").querySelector('[data-m="one"]').click(); $("aClass").value = cur.class; fillStu(); $("aStu").value = cur.id; await loadAtt(); }));
 
   /* ---------- attendance ---------- */
@@ -470,6 +510,99 @@
     await runBatch(l, (b, s) => b.update(doc(db, "students", s.id), { fees:arrayUnion(item) })); l.forEach((s) => (s.fees = [...(s.fees || []), item])); renderFeeOver(); renderHome(); toast("Added for " + l.length + " students");
   }));
 
+  /* ---------- monthly fee plan, dues and reminders ---------- */
+  let plans = {};
+  const pad = (n) => String(n).padStart(2, "0"), ymd = (d) => d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+  const MONN = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"], dFmt = (d) => d.getDate() + " " + MONN[d.getMonth()] + " " + d.getFullYear();
+  const ord = (n) => n + (["th","st","nd","rd"][(n % 100 > 10 && n % 100 < 14) ? 0 : (n % 10 < 4 ? n % 10 : 0)] || "th");
+  const isStu = (s) => (s.role || "student") === "student";
+  const mFee = (s) => { const p = plans[s.class]; return p && p.subjects ? (s.subjects || []).reduce((a, x) => a + (Number(p.subjects[x]) || 0), 0) : 0; };
+  const joinedD = (s) => { if (s.joinedOn) return new Date(s.joinedOn + "T00:00:00"); const c = s.createdAt && s.createdAt.toDate ? s.createdAt.toDate() : null; return c ? new Date(c.getFullYear(), c.getMonth(), c.getDate()) : null; };
+  function cycles(s) {
+    const j = joinedD(s); if (!j || isNaN(j)) return []; const out = [], now = new Date();
+    for (let k = 0; k < 600; k++) { const y = j.getFullYear(), m = j.getMonth() + k, dim = new Date(y, m + 1, 0).getDate(), due = new Date(y, m, Math.min(j.getDate(), dim));
+      out.push({ k, key:"m" + due.getFullYear() + pad(due.getMonth() + 1), due }); if (due > now) break; }
+    return out;
+  }
+  const paidRec = (s, c) => (c.k === 0 ? { on:ymd(c.due), adm:true } : (s.feePaid && s.feePaid[c.key]) || null);
+  function pend(s) {
+    const now = new Date(), amt = mFee(s), cyc = amt ? cycles(s).filter((c) => c.k >= 1 && c.due <= now && !paidRec(s, c)) : [];
+    const once = (s.fees || []).filter((f) => !f.paid && (!f.due || f.due <= ymd(now))).reduce((a, f) => a + (f.amt || 0), 0);
+    return { cyc, monthly:cyc.length * amt, once, amt:cyc.length * amt + once };
+  }
+  seg("feeMode", (b) => { ["dues","plan","once"].forEach((m) => ($("fm-" + m).hidden = m !== b.dataset.m)); });
+
+  /* fee plan: monthly price per subject, per class */
+  let planClass = CLASSES[0];
+  seg("planClasses", (b) => { planClass = b.dataset.c; renderPlan(); });
+  function renderPlan() {
+    const p = (plans[planClass] && plans[planClass].subjects) || {}; $("planName").textContent = "Class " + planClass;
+    $("planRows").innerHTML = SUBJECTS.map((x) => `<div class="item"><div class="tx"><b>${x}</b><small>Monthly fee. Leave empty if this subject is not taught.</small></div>
+      <div style="display:flex;align-items:center;gap:6px;font-weight:700">₹<input class="in" style="width:130px" type="number" min="0" data-sub="${x}" value="${p[x] ?? ""}" aria-label="Monthly fee for ${x}"></div></div>`).join("");
+    $("planNote").textContent = students.filter((st) => st.class === planClass && isStu(st)).length + " student(s) in this class. Each pays the total of the subjects they chose.";
+  }
+  const readPlan = () => { const o = {}; $("planRows").querySelectorAll("input").forEach((i) => { if (i.value !== "") o[i.dataset.sub] = Number(i.value); }); return o; };
+  const afterPlan = () => { renderHome(); renderDues(); renderPlan(); };
+  $("planSave").addEventListener("click", safe(async () => { const o = readPlan();
+    await setDoc(doc(db, "feeStructure", planClass), { class:planClass, subjects:o, updatedAt:serverTimestamp() }); plans[planClass] = { class:planClass, subjects:o }; afterPlan(); toast("Fee plan saved for Class " + planClass); }));
+  $("planAll").addEventListener("click", safe(async () => { const o = readPlan(); if (!confirm("Use these prices for ALL classes? This replaces every class's fee plan.")) return;
+    await runBatch(CLASSES, (b, c) => b.set(doc(db, "feeStructure", c), { class:c, subjects:o, updatedAt:serverTimestamp() })); CLASSES.forEach((c) => (plans[c] = { class:c, subjects:o })); afterPlan(); toast("Fee plan copied to all classes"); }));
+
+  /* monthly dues list */
+  function renderDues() {
+    const q = $("mq").value.trim().toLowerCase(), c = $("mc").value, k = $("ms").value;
+    const l = students.filter(isStu).filter((s) => (!q || (s.name || "").toLowerCase().includes(q) || (s.mobile || "").includes(q)) && (!c || s.class === c)).map((s) => ({ s, amt:mFee(s), p:pend(s) }))
+      .filter((r) => k === "all" || (k === "pending" && r.p.cyc.length) || (k === "ok" && r.amt && !r.p.cyc.length) || (k === "noplan" && !r.amt)).sort((a, b) => byName(a.s, b.s));
+    $("dueList").innerHTML = l.map((r) => { const j = joinedD(r.s);
+      return `<div class="item"><div class="tx"><b>${esc(r.s.name)}</b><small>Class ${esc(r.s.class)} · ${esc((r.s.subjects || []).join(", ") || "no subjects")}</small>
+        <small>${r.amt ? inr(r.amt) + " per month" + (j && !isNaN(j) ? " · due on the " + ord(j.getDate()) : " · no joining date") : "No fee plan for this class and these subjects"}</small></div>
+        <span class="pill ${!r.amt ? "sc" : r.p.cyc.length ? "wn" : "ok"}">${!r.amt ? "No plan" : r.p.cyc.length ? "Pending " + inr(r.p.monthly) + " (" + r.p.cyc.length + " mo)" : "Up to date"}</span>
+        <button class="btn soft s" data-pay="${r.s.id}">Fees</button></div>`; }).join("") || '<p class="empty">No students match.</p>';
+  }
+  ["mq","mc","ms"].forEach((id) => $(id).addEventListener("input", renderDues));
+  $("dueList").addEventListener("click", (e) => { const b = e.target.closest("[data-pay]"); if (b) openPay(b.dataset.pay); });
+
+  /* month-by-month payment window */
+  let payStu = null;
+  function openPay(id) { payStu = byId(id); renderPay(); $("dPay").showModal(); }
+  function renderPay() {
+    const s = payStu, amt = mFee(s), j = joinedD(s); $("payTitle").textContent = "Monthly fees · " + (s.name || ""); $("payAll").hidden = true;
+    if (!j || isNaN(j)) { $("paySub").textContent = "No joining date found. Set one in Students → Manage."; $("payRows").innerHTML = ""; return; }
+    if (!amt) { $("paySub").textContent = "No fee plan covers Class " + s.class + " with this student's subjects yet. Set it in Fees → Fee plan."; $("payRows").innerHTML = ""; return; }
+    $("paySub").textContent = inr(amt) + " per month (" + (s.subjects || []).join(", ") + "), due on the " + ord(j.getDate()) + " of each month. The first month is paid when the account is created.";
+    const now = new Date(), cyc = cycles(s).slice().reverse(); $("payAll").hidden = !pend(s).cyc.length;
+    $("payRows").innerHTML = cyc.map((c) => { const r = paidRec(s, c), late = !r && c.due <= now;
+      return `<div class="item"><div class="tx"><b>${MONN[c.due.getMonth()]} ${c.due.getFullYear()}</b><small>Due ${dFmt(c.due)}</small></div>
+        <span class="pill ${r ? "ok" : late ? "wn" : "sc"}">${r ? (c.k === 0 ? "Paid at admission" : "Paid on " + esc(r.on)) : late ? "Pending" : "Upcoming"}</span>
+        ${c.k === 0 ? "" : r ? `<button class="btn dng s" data-undo="${c.key}">Undo</button>` : `<button class="btn s" data-mark="${c.key}">Mark paid</button>`}</div>`; }).join("");
+  }
+  const afterPay = () => { renderPay(); renderDues(); renderHome(); };
+  $("payRows").addEventListener("click", safe(async (e) => {
+    const m = e.target.closest("[data-mark]"), u = e.target.closest("[data-undo]"), s = payStu;
+    if (m) { const rec = { on:ymd(new Date()), amt:mFee(s) }; await updateDoc(doc(db, "students", s.id), { ["feePaid." + m.dataset.mark]:rec }); (s.feePaid ||= {})[m.dataset.mark] = rec; afterPay(); toast("Marked as paid"); }
+    if (u && confirm("Mark this month as NOT paid?")) { await updateDoc(doc(db, "students", s.id), { ["feePaid." + u.dataset.undo]:deleteField() }); delete s.feePaid[u.dataset.undo]; afterPay(); toast("Payment removed"); }
+  }));
+  $("payAll").addEventListener("click", safe(async () => { const s = payStu, p = pend(s), rec = { on:ymd(new Date()), amt:mFee(s) }, upd = {};
+    p.cyc.forEach((c) => (upd["feePaid." + c.key] = rec)); await updateDoc(doc(db, "students", s.id), upd); s.feePaid = s.feePaid || {}; p.cyc.forEach((c) => (s.feePaid[c.key] = rec)); afterPay(); toast("All pending months marked as paid"); }));
+
+  /* reminders: a notification is created for each student once their due date arrives */
+  const autoReminders = safe(async (manual) => {
+    const now = new Date(), todo = [];
+    students.filter((s) => isStu(s) && !s.blocked).forEach((s) => { const amt = mFee(s); if (!amt) return;
+      const fresh = cycles(s).filter((c) => c.k >= 1 && c.due <= now && !paidRec(s, c) && !(s.feeReminded && s.feeReminded[c.key])); if (fresh.length) todo.push({ s, fresh, amt }); });
+    if (!todo.length) { if (manual) toast("No new reminders to send. Everyone due has already been reminded."); return; }
+    if (manual && !confirm("Send a fee reminder to " + todo.length + " student(s)?")) return;
+    const text = (t) => { const last = t.fresh[t.fresh.length - 1].due, total = t.amt * t.fresh.length;
+      return t.fresh.length === 1 ? "Your monthly fee of " + inr(total) + " was due on " + dFmt(last) + ". Please pay at the institute." : "Fee pending: " + inr(total) + " for " + t.fresh.length + " months. Latest due date: " + dFmt(last) + ". Please pay at the institute."; };
+    await runBatch(todo, (b, t) => { const upd = {}; t.fresh.forEach((c) => (upd["feeReminded." + c.key] = true));
+      b.set(doc(collection(db, "notifications")), { title:"Monthly fee due", body:text(t), target:"student", uid:t.s.id, class:t.s.class, auto:true, byName:"Fee reminder", createdAt:serverTimestamp() });
+      b.update(doc(db, "students", t.s.id), upd); }, 200);
+    todo.forEach((t) => { t.s.feeReminded = { ...(t.s.feeReminded || {}), ...Object.fromEntries(t.fresh.map((c) => [c.key, true])) };
+      notices.unshift({ id:"r" + t.s.id + Date.now(), title:"Monthly fee due", body:text(t), target:"student", byName:"Fee reminder", createdAt:{ toDate:() => new Date() } }); });
+    renderNotes(); toast("Sent " + todo.length + " fee reminder(s)");
+  });
+  $("remindNow").addEventListener("click", () => autoReminders(true));
+
   /* ---------- time table ---------- */
   let ttData = {}, ttClass = CLASSES[0];
   seg("ttClasses", (b) => { ttClass = b.dataset.c; loadTT(); });
@@ -490,7 +623,7 @@
   let nTarget = "all";
   seg("nTarget", (b) => { nTarget = b.dataset.t; $("nClsWrap").hidden = nTarget !== "class"; });
   function renderNotes() {
-    $("nList").innerHTML = notices.map((n) => `<div class="item"><div class="tx"><b>${esc(n.title)}</b><small>${esc(n.body)}</small><small>To: ${n.target === "class" ? "Class " + esc(n.class) : n.target === "teacher" ? "Teachers" : "Everyone"}${n.byName ? " · by " + esc(n.byName) : ""} · ${n.createdAt && n.createdAt.toDate ? n.createdAt.toDate().toLocaleString() : ""}</small></div>
+    $("nList").innerHTML = notices.map((n) => `<div class="item"><div class="tx"><b>${esc(n.title)}</b><small>${esc(n.body)}</small><small>To: ${n.target === "class" ? "Class " + esc(n.class) : n.target === "teacher" ? "Teachers" : n.target === "student" ? "One student" : "Everyone"}${n.byName ? " · by " + esc(n.byName) : ""} · ${n.createdAt && n.createdAt.toDate ? n.createdAt.toDate().toLocaleString() : ""}</small></div>
       <button class="btn dng s" data-nd="${n.id}">Delete</button></div>`).join("") || '<p class="empty">No notices yet.</p>';
   }
   $("nPost").addEventListener("click", safe(async () => {

@@ -3,17 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#e9eff9" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e1630" media="(prefers-color-scheme: dark)">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet">
 <title>Student Dashboard</title>
 <style>
-  :root {
-    --bg1:#eceffd; --bg2:#f8f6ff; --card:#fff; --text:#14183c; --muted:#6b7090; --line:#e8eaf6;
-    --blue:#1f5bff; --blue-soft:rgba(31,91,255,.12); --green:#1fa971; --red:#e5484d; --orange:#f59e0b; --purple:#7c4dff; --teal:#14b8a6;
-    --sh:0 8px 26px rgba(60,70,160,.09); --glass:rgba(255,255,255,.62); --glass-b:rgba(255,255,255,.85);
+      :root {
+    --bg1:#e9eff9; --bg2:#f6f8fc; --card:#ffffff; --text:#0f1b3d; --muted:#6a7897; --line:#e1e8f4;
+    --blue:#2b5fd9; --blue-soft:rgba(43,95,217,.11); --green:#12a56a; --red:#d6455d; --orange:#e69a1a; --purple:#6d5bd0; --teal:#0e9aa7;
+    --sh:0 8px 26px rgba(20,40,110,.09); --glass:rgba(255,255,255,.8); --glass-b:rgba(255,255,255,.9);
+    --b1:rgba(90,130,255,.2); --b2:rgba(120,200,230,.18); --b3:rgba(140,120,240,.14);
   }
   @media (prefers-color-scheme: dark) {
-    :root { --bg1:#12142b; --bg2:#181a38; --card:#1c1f3d; --text:#eef0ff; --muted:#9aa0d0; --line:#2c3060;
-      --blue:#7b99ff; --blue-soft:rgba(123,153,255,.16); --green:#4fd69c; --red:#ff7b80; --orange:#ffbd4a; --purple:#a98bff; --teal:#4fd6c7;
-      --sh:0 8px 26px rgba(0,0,0,.35); --glass:rgba(28,31,61,.6); --glass-b:rgba(150,160,255,.25); }
+    :root { --bg1:#0e1630; --bg2:#141d3d; --card:#1a2547; --text:#eaf0ff; --muted:#9fb0d6; --line:#2a3862;
+      --blue:#7ea4ff; --blue-soft:rgba(126,164,255,.17); --green:#4fd69c; --red:#ff7b8f; --orange:#ffc25c; --purple:#a99bff; --teal:#4fd1d9;
+      --sh:0 10px 28px rgba(0,0,0,.4); --glass:rgba(26,37,71,.7); --glass-b:rgba(126,164,255,.25);
+      --b1:rgba(90,130,255,.16); --b2:rgba(80,190,220,.1); --b3:rgba(140,110,240,.14); }
   }
   * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
   body { min-height:100vh; color:var(--text); font-family:"Inter","Segoe UI",system-ui,sans-serif;
@@ -26,7 +32,8 @@
   svg.i { width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; flex:none; }
   [hidden] { display:none !important; }
 
-  .banner { background:rgba(229,72,77,.12); color:var(--red); border:1px solid var(--red); border-radius:16px; padding:12px 16px; font-weight:700; font-size:.9rem; margin-bottom:14px; }
+  .banner { background:rgba(214,69,93,.12); color:var(--red); border:1px solid var(--red); border-radius:16px; padding:12px 16px; font-weight:700; font-size:.9rem; margin-bottom:14px; }
+  .notice { background:rgba(230,154,26,.15); color:var(--orange); border:1px solid var(--orange); border-radius:16px; padding:12px 16px; font-weight:700; font-size:.92rem; margin-bottom:14px; animation:rise .5s cubic-bezier(.2,.7,.2,1) backwards; }
   header { display:flex; align-items:center; gap:10px; margin-bottom:18px; }
   header .hd { flex:1; min-width:0; }
   h1 { font-size:clamp(1.35rem,5.6vw,1.95rem); font-weight:800; line-height:1.2; overflow-wrap:anywhere; }
@@ -53,15 +60,15 @@
   .head { display:flex; align-items:center; gap:14px; margin-bottom:14px; }
   .head h2 { font-size:1.08rem; font-weight:800; }
   .tile { width:46px; height:46px; border-radius:14px; display:grid; place-items:center; flex:none; }
-  .t-blue { background:var(--blue-soft); color:var(--blue); } .t-green { background:rgba(31,169,113,.15); color:var(--green); }
-  .t-orange { background:rgba(245,158,11,.16); color:var(--orange); } .t-purple { background:rgba(124,77,255,.15); color:var(--purple); }
-  .t-red { background:rgba(229,72,77,.14); color:var(--red); } .t-teal { background:rgba(20,184,166,.15); color:var(--teal); }
+  .t-blue { background:var(--blue-soft); color:var(--blue); } .t-green { background:rgba(18,165,106,.15); color:var(--green); }
+  .t-orange { background:rgba(230,154,26,.16); color:var(--orange); } .t-purple { background:rgba(109,91,208,.15); color:var(--purple); }
+  .t-red { background:rgba(214,69,93,.14); color:var(--red); } .t-teal { background:rgba(14,154,167,.15); color:var(--teal); }
   .sel { margin-left:auto; padding:10px 12px; border-radius:12px; border:1px solid var(--line); background:var(--card); color:var(--text); font:inherit; font-size:.9rem; }
 
   .attbody { display:flex; align-items:center; gap:10px; }
   .ring { position:relative; width:clamp(100px,27vw,150px); aspect-ratio:1; flex:none; }
   .ring svg { width:100%; height:100%; transform:rotate(-90deg); }
-  .ring .tr { stroke:var(--blue-soft); } .ring .fg { stroke:var(--blue); stroke-linecap:round; transition:stroke-dashoffset 1.2s cubic-bezier(.2,.7,.2,1); }
+  .ring .tr { stroke:var(--blue-soft); } .ring .fg { stroke:url(#rg); stroke-linecap:round; transition:stroke-dashoffset 1.2s cubic-bezier(.2,.7,.2,1); }
   .ringtxt { position:absolute; inset:0; display:grid; place-content:center; text-align:center; }
   .ringtxt b { font-size:clamp(1.4rem,5vw,2rem); font-weight:800; } .ringtxt span { font-size:.72rem; color:var(--muted); }
   #chart { flex:1; min-width:0; height:170px; }
@@ -110,8 +117,8 @@
   @keyframes drop { from { opacity:0; transform:translateY(-6px) scale(.85); } }
   @keyframes wave { 0%,60%,100% { transform:rotate(0); } 10%,30% { transform:rotate(16deg); } 20%,40% { transform:rotate(-10deg); } 50% { transform:rotate(8deg); } }
   @keyframes floaty { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-8px); } }
-  @keyframes ping { 0% { box-shadow:0 0 0 0 rgba(31,91,255,.45); } 80%,100% { box-shadow:0 0 0 9px rgba(31,91,255,0); } }
-  @keyframes avpulse { 0% { box-shadow:var(--sh),0 0 0 0 rgba(111,139,255,.45); } 70%,100% { box-shadow:var(--sh),0 0 0 12px rgba(111,139,255,0); } }
+  @keyframes ping { 0% { box-shadow:0 0 0 0 rgba(43,95,217,.45); } 80%,100% { box-shadow:0 0 0 9px rgba(31,91,255,0); } }
+  @keyframes avpulse { 0% { box-shadow:var(--sh),0 0 0 0 rgba(79,134,255,.45); } 70%,100% { box-shadow:var(--sh),0 0 0 12px rgba(111,139,255,0); } }
   @keyframes wiggle { 0%,100% { transform:rotate(0); } 25% { transform:rotate(-14deg); } 75% { transform:rotate(14deg); } }
 
   header { animation:rise .6s cubic-bezier(.2,.7,.2,1) backwards; }
@@ -119,12 +126,12 @@
   main > .card { animation:rise .65s cubic-bezier(.2,.7,.2,1) backwards; }
   main > :nth-child(1) { animation-delay:.10s; } main > :nth-child(3) { animation-delay:.40s; } main > :nth-child(4) { animation-delay:.50s; }
   .grid3 > .card { animation:pop .55s cubic-bezier(.2,.8,.3,1.15) backwards; }
-  .grid3:nth-child(2) > .card:nth-child(1) { animation-delay:.25s; } .grid3:nth-child(2) > .card:nth-child(2) { animation-delay:.33s; } .grid3:nth-child(2) > .card:nth-child(3) { animation-delay:.41s; }
+  .grid3 > .card:nth-child(1) { animation-delay:.25s; } .grid3 > .card:nth-child(2) { animation-delay:.33s; } .grid3 > .card:nth-child(3) { animation-delay:.41s; }
   nav { animation:navin .6s .45s cubic-bezier(.2,.8,.3,1) backwards; }
   #hFeeDue, #hTestNext { animation:fade .6s 1s backwards; }
 
   .card, .tile, .push, .link svg.i, .nrow { transition:transform .25s cubic-bezier(.2,.8,.3,1.2), box-shadow .25s ease; }
-  @media (hover:hover) { a.card:hover { transform:translateY(-5px); box-shadow:0 16px 34px rgba(60,70,160,.2); } }
+  @media (hover:hover) { a.card:hover { transform:translateY(-5px); box-shadow:0 16px 34px rgba(30,60,140,.22); } }
   a.card:active { transform:scale(.97); }
   @media (hover:hover) { a.card:hover .tile { transform:scale(1.12) rotate(-5deg); } }
   @media (hover:hover) { a.card:hover .push, a.card:hover .link svg.i { transform:translateX(5px); } }
@@ -168,18 +175,18 @@
   .calsum { display:flex; gap:8px; margin-bottom:12px; }
   .calsum span { flex:1 1 0; min-width:0; padding:8px 10px; border-radius:14px; font-size:.76rem; font-weight:700; color:var(--muted); display:flex; flex-direction:column; gap:1px; }
   .calsum b { font-size:1.2rem; font-weight:800; }
-  .calsum .sp { background:rgba(31,169,113,.12); } .calsum .sp b { color:var(--green); }
-  .calsum .sa { background:rgba(229,72,77,.11); } .calsum .sa b { color:var(--red); }
-  .calsum .sh { background:rgba(124,130,180,.12); } .calsum .sh b { color:var(--text); }
+  .calsum .sp { background:rgba(18,165,106,.12); } .calsum .sp b { color:var(--green); }
+  .calsum .sa { background:rgba(214,69,93,.11); } .calsum .sa b { color:var(--red); }
+  .calsum .sh { background:rgba(100,116,139,.12); } .calsum .sh b { color:var(--text); }
   .calwk, .calgrid { display:grid; grid-template-columns:repeat(7,1fr); gap:clamp(3px,1.2vw,6px); }
   .calwk span { text-align:center; font-size:.72rem; font-weight:800; color:var(--muted); padding:4px 0; }
   .calgrid { touch-action:pan-y; }
   .cd { position:relative; aspect-ratio:1; min-height:34px; border-radius:12px; display:grid; place-items:center; font-weight:700; font-size:.9rem; color:var(--text);
     transition:transform .22s cubic-bezier(.2,.8,.3,1.4), background .25s, color .25s, box-shadow .25s; animation:cdPop .45s cubic-bezier(.2,.8,.3,1.2) calc(var(--i,0) * 14ms) backwards; }
   .cd.e { visibility:hidden; pointer-events:none; animation:none; }
-  .cd.p { background:rgba(31,169,113,.15); color:var(--green); }
-  .cd.a { background:rgba(229,72,77,.14); color:var(--red); }
-  .cd.h { background:rgba(124,130,180,.1); color:var(--muted); }
+  .cd.p { background:rgba(18,165,106,.15); color:var(--green); }
+  .cd.a { background:rgba(214,69,93,.14); color:var(--red); }
+  .cd.h { background:rgba(100,116,139,.1); color:var(--muted); }
   .cd.td::before { content:""; position:absolute; inset:-3px; border-radius:15px; border:2px solid var(--blue); animation:ringp 2.2s ease-out infinite; }
   .cd.sel { background:var(--blue); color:var(--card); transform:scale(1.1); z-index:1; box-shadow:0 8px 16px var(--blue-soft); }
   .cd:not(.e):active { transform:scale(.9); }
@@ -236,6 +243,60 @@
     .cd { font-size:1rem; max-height:62px; }
     .calwk span { font-size:.8rem; }
   }
+
+  /* ---------- professional theme ---------- */
+  body::before { content:""; position:fixed; inset:-10%; z-index:-1; pointer-events:none;
+    background:radial-gradient(40% 32% at 12% 8%, var(--b1), transparent 70%), radial-gradient(36% 30% at 92% 30%, var(--b2), transparent 70%), radial-gradient(40% 34% at 20% 95%, var(--b3), transparent 70%);
+    animation:bgdrift 16s ease-in-out infinite alternate; }
+  @keyframes bgdrift { to { transform:translate3d(2%,3%,0) scale(1.07); } }
+  @keyframes pillIn { from { opacity:0; transform:scale(.7); } }
+
+  .card { border:1px solid var(--line); border-radius:22px; }
+  .grid3 .card { border-radius:20px; }
+  .tile { border-radius:14px; }
+  .sel { border-radius:12px; font-weight:700; }
+  .avatar { background:linear-gradient(145deg,#4f86ff,#2548b8); }
+  .rankbtn { background:var(--card); border:1px solid var(--line); }
+  .streak { border:1px solid var(--line); }
+  .pdrop { border-radius:16px; }
+  header h1 { font-size:clamp(1.3rem,5vw,1.7rem); }
+
+  .btn { background:linear-gradient(135deg,#3f78f2,#2548b8); color:#fff; border-radius:12px; padding:12px 22px; box-shadow:0 8px 18px rgba(37,72,184,.3); }
+  @media (hover:hover) { .btn:hover { box-shadow:0 12px 26px rgba(37,72,184,.42); } }
+
+  nav { background:linear-gradient(135deg,#1c2d5a,#2b4691); border:1px solid rgba(255,255,255,.14); border-radius:28px; padding:8px;
+    -webkit-backdrop-filter:none; backdrop-filter:none; box-shadow:0 14px 34px rgba(20,35,90,.38); }
+  nav a { color:rgba(255,255,255,.78); border-radius:20px; }
+  nav a.on { color:#1f3f9e; background:#fff; box-shadow:0 6px 14px rgba(10,20,60,.25); animation:pillIn .5s .55s cubic-bezier(.2,.8,.3,1.3) backwards; }
+  @media (hover:hover) { nav a:not(.on):hover { background:rgba(255,255,255,.12); color:#fff; } }
+  .badge { background:#fff; color:#1f3f9e; }
+
+  /* ---------- greeting card with animated student ---------- */
+  main > :nth-child(1) { animation-delay:.05s; } main > :nth-child(2) { animation-delay:.18s; }
+  .hero { display:flex; align-items:center; justify-content:space-between; gap:8px; position:relative; overflow:hidden; border:0; color:#fff;
+    padding:clamp(18px,4vw,28px) clamp(16px,4vw,30px); padding-bottom:0; min-height:clamp(160px,36vw,210px);
+    background:linear-gradient(120deg,#17327f 0%,#2552c8 58%,#3f7bff 100%); box-shadow:0 14px 34px rgba(37,72,184,.28); }
+  .hero::before, .hero::after { content:""; position:absolute; border-radius:50%; pointer-events:none; background:rgba(255,255,255,.07); animation:floaty 7s ease-in-out infinite; }
+  .hero::before { width:220px; height:220px; right:-50px; top:-90px; }
+  .hero::after { width:130px; height:130px; left:38%; bottom:-70px; animation-delay:-3s; }
+  .hero-tx { position:relative; z-index:1; align-self:center; padding-bottom:clamp(18px,4vw,28px); min-width:0; }
+  .hello { font-size:clamp(1.4rem,5.8vw,2.2rem); font-weight:800; line-height:1.2; overflow-wrap:anywhere; }
+  .hero p { margin-top:10px; color:rgba(255,255,255,.82); font-size:clamp(.82rem,2.8vw,.95rem); max-width:32ch; }
+  .hero-art { position:relative; z-index:1; width:clamp(130px,34vw,210px); flex:none; align-self:flex-end; }
+  .hero-art svg { display:block; width:100%; height:auto; animation:artIn .8s cubic-bezier(.2,.8,.3,1.15) backwards; }
+  .fig { transform-origin:100px 200px; animation:bob 3.6s ease-in-out infinite; }
+  .head { transform-origin:100px 132px; animation:tilt 5s ease-in-out infinite; }
+  .armw { transform-origin:150px 152px; animation:wavearm 1.8s ease-in-out infinite; }
+  .eye { transform-box:fill-box; transform-origin:center; animation:blink 4.2s infinite; }
+  .spark { transform-box:fill-box; transform-origin:center; animation:twink 2.6s ease-in-out infinite; }
+  .halo { transform-box:fill-box; transform-origin:center; animation:halo 4.5s ease-in-out infinite; }
+  @keyframes artIn { from { opacity:0; transform:translateY(34px) scale(.92); } }
+  @keyframes bob { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-4px); } }
+  @keyframes tilt { 0%,100% { transform:rotate(-2.2deg); } 50% { transform:rotate(2.2deg); } }
+  @keyframes wavearm { 0%,100% { transform:rotate(-14deg); } 50% { transform:rotate(18deg); } }
+  @keyframes blink { 0%,92%,100% { transform:scaleY(1); } 96% { transform:scaleY(.1); } }
+  @keyframes twink { 0%,100% { opacity:.25; transform:scale(.65); } 50% { opacity:1; transform:scale(1.2); } }
+  @keyframes halo { 0%,100% { transform:scale(1); opacity:1; } 50% { transform:scale(1.06); opacity:.75; } }
 </style>
 </head>
 <body>
@@ -257,10 +318,11 @@
 
 <div class="app">
   <div class="banner" id="banner" role="alert" hidden></div>
+  <div class="notice" id="feeNote" role="status" hidden></div>
 
   <header>
     <div class="hd">
-      <h1 id="uname"><span id="fname">…</span></h1>
+      <h1>Dashboard</h1>
     </div>
     <div class="streak" title="Attendance streak" aria-label="Attendance streak"><svg class="i"><use href="#i-flame"/></svg><b id="streak">0</b><small>day streak</small></div>
     <a class="hbtn rankbtn" href="rank.html" aria-label="Rank" title="Rank"><svg class="i"><use href="#i-rank"/></svg></a>
@@ -273,6 +335,14 @@
   </header>
 
   <main>
+    <section class="card hero">
+      <div class="hero-tx">
+        <h2 class="hello"><span id="greet">Good morning</span>,<br><span id="fname">…</span></h2>
+        <p>Here's what's happening with your performance today.</p>
+      </div>
+      <div class="hero-art" id="heroArt" aria-hidden="true"></div>
+    </section>
+
     <div class="card">
       <div class="head">
         <div class="tile t-blue"><svg class="i"><use href="#i-cal"/></svg></div>
@@ -281,7 +351,7 @@
       </div>
       <div class="attbody">
         <div class="ring">
-          <svg viewBox="0 0 100 100"><circle class="tr" cx="50" cy="50" r="44" fill="none" stroke-width="8"/><circle class="fg" id="ringFg" cx="50" cy="50" r="44" fill="none" stroke-width="8" stroke-dasharray="276.46" stroke-dashoffset="276.46"/></svg>
+          <svg viewBox="0 0 100 100"><defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--teal)"/><stop offset="1" style="stop-color:var(--blue)"/></linearGradient></defs><circle class="tr" cx="50" cy="50" r="44" fill="none" stroke-width="8"/><circle class="fg" id="ringFg" cx="50" cy="50" r="44" fill="none" stroke-width="8" stroke-dasharray="276.46" stroke-dashoffset="276.46"/></svg>
           <div class="ringtxt"><b id="ringPct">0%</b><span>Overall<br>Attendance</span></div>
         </div>
         <div id="chart"></div>
@@ -324,12 +394,12 @@
         <a class="btn" href="tests.html">View Test Details</a>
       </div>
       <svg class="illus" viewBox="0 0 200 200" aria-hidden="true">
-        <ellipse cx="100" cy="118" rx="86" ry="70" fill="rgba(124,77,255,.12)"/>
-        <g transform="rotate(8 100 100)"><rect x="52" y="30" width="96" height="130" rx="12" fill="#5b4fe0"/><rect x="60" y="42" width="80" height="110" rx="6" fill="#fff"/>
-          <rect x="84" y="22" width="32" height="16" rx="7" fill="#7c6cf0"/>
-          <g fill="#c9d6ff"><rect x="88" y="58" width="44" height="5" rx="2"/><rect x="88" y="90" width="44" height="5" rx="2"/><rect x="88" y="122" width="44" height="5" rx="2"/></g>
-          <g fill="none" stroke="#2a7bff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M69 58l5 5 8-9"/><path d="M69 90l5 5 8-9"/><path d="M69 122l5 5 8-9"/></g></g>
-        <path d="M150 112l12 8-34 48-12-8z" fill="#5b4fe0"/><path d="M116 160l12 8-16 4z" fill="#ffb38a"/>
+        <ellipse cx="100" cy="118" rx="86" ry="70" fill="rgba(59,108,240,.14)"/>
+        <g transform="rotate(8 100 100)"><rect x="52" y="30" width="96" height="130" rx="12" fill="#3b6cf0"/><rect x="60" y="42" width="80" height="110" rx="6" fill="#fff"/>
+          <rect x="84" y="22" width="32" height="16" rx="7" fill="#6b93f5"/>
+          <g fill="#dbe6ff"><rect x="88" y="58" width="44" height="5" rx="2"/><rect x="88" y="90" width="44" height="5" rx="2"/><rect x="88" y="122" width="44" height="5" rx="2"/></g>
+          <g fill="none" stroke="#2b5fd9" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M69 58l5 5 8-9"/><path d="M69 90l5 5 8-9"/><path d="M69 122l5 5 8-9"/></g></g>
+        <path d="M150 112l12 8-34 48-12-8z" fill="#3b6cf0"/><path d="M116 160l12 8-16 4z" fill="#ffb38a"/>
       </svg>
     </div>
 
@@ -380,7 +450,7 @@
   const configured = !firebaseConfig.apiKey.startsWith("YOUR_");
 
   /* ---------- sample data for the cards (replace with real data later) ---------- */
-  const FEES = [ { due:"10 Nov 2026", amt:12500, paid:false } ];
+  const FEES = []; // filled automatically from the class fee plan (see showFees below)
   const MATS = [
     { t:"Quadratic Equations - Notes", d:"Maths · PDF", ago:"2h ago" },
     { t:"Newton's Laws - Practice Sheet", d:"Physics · PDF", ago:"1d ago" },
@@ -412,6 +482,43 @@
     el._raf = requestAnimationFrame(step);
   }
 
+  /* ---------- animated student illustrations ---------- */
+  const SP = '<path class="spark" d="M0 -7L2 -2L7 0L2 2L0 7L-2 2L-7 0L-2 -2Z" fill="#ffd166"/>';
+  const SPARKS = `<g transform="translate(26 44)">${SP}</g><g transform="translate(178 62)" style="animation-delay:.8s">${SP}</g><g transform="translate(16 112)">${SP.replace("class=\"spark\"","class=\"spark\" style=\"animation-delay:1.4s\"")}</g>`;
+  const FACE = (skin, hair) => `<circle cx="62" cy="94" r="7" fill="${skin}"/><circle cx="138" cy="94" r="7" fill="${skin}"/><circle cx="100" cy="90" r="38" fill="${skin}"/>`;
+  const EYES = `<ellipse class="eye" cx="84" cy="92" rx="4.2" ry="5.4" fill="#2b1a14"/><ellipse class="eye" cx="116" cy="92" rx="4.2" ry="5.4" fill="#2b1a14"/>
+    <path d="M77 82Q84 78 91 82M109 82Q116 78 123 82" stroke="#3a2418" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+    <path d="M91 106Q100 115 109 106" stroke="#9a4f3f" stroke-width="3" fill="none" stroke-linecap="round"/>`;
+  const ART = {
+    girl: `<svg viewBox="0 0 200 200"><circle class="halo" cx="100" cy="120" r="84" fill="rgba(255,255,255,.13)"/>${SPARKS}
+      <g class="fig">
+        <path d="M58 92C50 44 84 30 100 30C116 30 150 44 142 92C148 128 140 150 130 160L122 124L78 124L70 160C60 150 52 128 58 92Z" fill="#4a2c20"/>
+        <path d="M28 200C28 152 60 136 100 136C140 136 172 152 172 200Z" fill="#f4f7ff"/>
+        <path d="M84 138Q100 156 116 138" fill="none" stroke="#c3d2f3" stroke-width="3" stroke-linecap="round"/>
+        <rect x="88" y="116" width="24" height="26" rx="9" fill="#eab08c"/>
+        <g class="armw"><line x1="150" y1="152" x2="174" y2="116" stroke="#e3ebff" stroke-width="22" stroke-linecap="round"/><circle cx="177" cy="108" r="11" fill="#f8d0b0"/></g>
+        <g class="head">${FACE("#f8d0b0")}
+          <path d="M61 86C60 56 80 44 100 44C122 44 140 56 139 86C128 74 116 66 100 62C86 66 72 76 61 86Z" fill="#4a2c20"/>
+          <circle cx="124" cy="54" r="6" fill="#ffd166"/><circle cx="124" cy="54" r="2.4" fill="#ff9f43"/>
+          ${EYES}
+          <circle cx="75" cy="104" r="6" fill="rgba(255,120,130,.32)"/><circle cx="125" cy="104" r="6" fill="rgba(255,120,130,.32)"/>
+        </g>
+      </g></svg>`,
+    boy: `<svg viewBox="0 0 200 200"><circle class="halo" cx="100" cy="120" r="84" fill="rgba(255,255,255,.13)"/>${SPARKS}
+      <g class="fig">
+        <path d="M28 200C28 152 60 136 100 136C140 136 172 152 172 200Z" fill="#ffd166"/>
+        <path d="M82 138L100 158L118 138" fill="#fff6d9" stroke="#f0b73a" stroke-width="2" stroke-linejoin="round"/>
+        <rect x="88" y="116" width="24" height="26" rx="9" fill="#dca67f"/>
+        <g class="armw"><line x1="150" y1="152" x2="174" y2="116" stroke="#f5c04a" stroke-width="22" stroke-linecap="round"/><circle cx="177" cy="108" r="11" fill="#efc29d"/></g>
+        <g class="head">${FACE("#efc29d")}
+          <path d="M60 88C56 52 80 36 102 38C126 40 142 58 140 88C134 72 122 62 104 60C86 60 70 70 60 88Z" fill="#2a1d17"/>
+          <path d="M94 42Q104 26 120 36Q108 38 102 48Z" fill="#2a1d17"/>
+          ${EYES}
+          <circle cx="75" cy="104" r="5" fill="rgba(230,110,90,.22)"/><circle cx="125" cy="104" r="5" fill="rgba(230,110,90,.22)"/>
+        </g>
+      </g></svg>`
+  };
+
   /* ---------- student name from Firebase ---------- */
   function showBanner(m) { $("banner").textContent = m; $("banner").hidden = false; }
   function showStudent(data) {
@@ -419,6 +526,10 @@
     const first = full ? full.split(/\s+/)[0] : "Student";
     const fe = $("fname"); fe.textContent = first; fe.classList.remove("in"); void fe.offsetWidth; fe.classList.add("in");
     $("avatar").textContent = first.charAt(0).toUpperCase();
+    const hr = new Date().getHours();
+    $("greet").textContent = hr < 12 ? "Good morning" : hr < 17 ? "Good afternoon" : "Good evening";
+    const g = String(data.gender || data.sex || "").trim().toLowerCase();
+    $("heroArt").innerHTML = ART[/^(m|male|boy|man)$/.test(g) ? "boy" : "girl"];
   }
 
   /* ---------- attendance chart (sample data) ---------- */
@@ -450,11 +561,11 @@
     const xs = (W < 300 ? [1, 15, 29] : [1, 8, 15, 22, 29]).filter((d) => d <= mi.dim).map((d) =>
       `<text class="gt" x="${L + (d - 1) / Math.max(mi.dim - 1, 1) * (W - L - R)}" y="${H - 6}" text-anchor="middle">${d} ${mi.name}</text>`).join("");
     el.innerHTML = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Attendance chart">
-      <defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1f5bff" stop-opacity=".28"/><stop offset="1" stop-color="#1f5bff" stop-opacity="0"/></linearGradient></defs>
+      <defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2b5fd9" stop-opacity=".3"/><stop offset="1" stop-color="#2b5fd9" stop-opacity="0"/></linearGradient></defs>
       ${grid}${xs}<path class="${anim ? "fa" : ""}" d="${area}" fill="url(#ag)"/><path class="ln" d="${path}"/>
       ${pts.map((p, i) => `<circle class="dt${anim ? " pop" : ""}" style="animation-delay:${Math.round(i * 900 / pts.length)}ms" cx="${p.x}" cy="${p.y}" r="2.6"/>`).join("")}
-      <g><line id="tl" stroke="#8a93d6" stroke-dasharray="3 3"/><circle id="tc" r="5" fill="#1f5bff" stroke="#fff" stroke-width="2"/>
-      <rect id="tr" width="60" height="36" rx="8" fill="#14183c"/><text id="t1" fill="#fff" font-size="10" text-anchor="middle"/><text id="t2" fill="#fff" font-size="13" font-weight="700" text-anchor="middle"/></g></svg>`;
+      <g><line id="tl" stroke="#a9b6d6" stroke-dasharray="3 3"/><circle id="tc" r="5" fill="#2b5fd9" stroke="#fff" stroke-width="2"/>
+      <rect id="tr" width="60" height="36" rx="8" fill="#12204a"/><text id="t1" fill="#fff" font-size="10" text-anchor="middle"/><text id="t2" fill="#fff" font-size="13" font-weight="700" text-anchor="middle"/></g></svg>`;
     if (anim && !reduce) {
       const ln = el.querySelector(".ln"), len = ln.getTotalLength();
       ln.style.strokeDasharray = len; ln.style.strokeDashoffset = len; ln.getBoundingClientRect();
@@ -586,6 +697,38 @@
     document.querySelectorAll("main > .card.cal, main > .card.ut, main > .card:last-child").forEach((c) => { c.classList.add("rv"); io.observe(c); });
   }
 
+  /* ---------- fees: worked out from the class fee plan, the student's subjects and joining date ---------- */
+  const pad2 = (n) => String(n).padStart(2, "0"), ymdS = (d) => d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate());
+  const dFmtS = (d) => d.getDate() + " " + MON[d.getMonth()] + " " + d.getFullYear();
+  function joinedOf(s) { if (s.joinedOn) return new Date(s.joinedOn + "T00:00:00"); const c = s.createdAt && s.createdAt.toDate ? s.createdAt.toDate() : null; return c ? new Date(c.getFullYear(), c.getMonth(), c.getDate()) : null; }
+  function cyclesOf(s) {
+    const j = joinedOf(s); if (!j || isNaN(j)) return []; const out = [], now = new Date();
+    for (let k = 0; k < 600; k++) { const y = j.getFullYear(), m = j.getMonth() + k, dim = new Date(y, m + 1, 0).getDate(), due = new Date(y, m, Math.min(j.getDate(), dim));
+      out.push({ k, key:"m" + due.getFullYear() + pad2(due.getMonth() + 1), due }); if (due > now) break; }
+    return out;
+  }
+  async function showFees(s, db) {
+    let plan = null; try { const p = await getDoc(doc(db, "feeStructure", String(s.class))); if (p.exists()) plan = p.data(); } catch (e) {}
+    const amt = plan && plan.subjects ? (s.subjects || []).reduce((a, x) => a + (Number(plan.subjects[x]) || 0), 0) : 0, now = new Date(), cyc = amt ? cyclesOf(s) : [];
+    const unpaid = cyc.filter((c) => c.k >= 1 && c.due <= now && !(s.feePaid && s.feePaid[c.key])), upcoming = cyc.find((c) => c.due > now);
+    const onceList = (s.fees || []).filter((f) => !f.paid && (!f.due || f.due <= ymdS(now)));
+    const once = onceList.reduce((a, f) => a + (f.amt || 0), 0), due = amt * unpaid.length + once;
+    countTo($("hFee"), due, inr, 1200);
+    const fd = $("hFeeDue");
+    if (unpaid.length) { fd.className = "down"; fd.textContent = "Due since " + dFmtS(unpaid[0].due); }
+    else if (once) { fd.className = "down"; fd.textContent = "Other fees due"; }
+    else if (upcoming) { fd.className = "up"; fd.textContent = "Next due " + dFmtS(upcoming.due); }
+    else { fd.className = "sub"; fd.textContent = amt ? "" : "Fee plan not set yet"; }
+    const n = $("feeNote");
+    if (due > 0) { n.textContent = "💰 Fee pending: " + inr(due) + (unpaid.length ? " (" + unpaid.length + " month" + (unpaid.length > 1 ? "s" : "") + ", last due " + dFmtS(unpaid[unpaid.length - 1].due) + ")" : "") + ". Please pay at the institute."; n.hidden = false; }
+    else if (upcoming && (upcoming.due - now) / 864e5 <= 3) { n.textContent = "🔔 Your monthly fee of " + inr(amt) + " is due on " + dFmtS(upcoming.due) + "."; n.hidden = false; }
+    // fee dates appear on the calendar (orange dots)
+    unpaid.forEach((c) => addEv(dFmtS(c.due), { type:"f", text:"Monthly fee due " + inr(amt) }));
+    if (upcoming) addEv(dFmtS(upcoming.due), { type:"f", text:"Monthly fee due " + inr(amt) });
+    (s.fees || []).filter((f) => !f.paid && f.due).forEach((f) => { const p = new Date(f.due + "T00:00:00"); if (!isNaN(p)) addEv(dFmtS(p), { type:"f", text:(f.label || "Fee") + " due " + inr(f.amt || 0) }); });
+    renderCal(0);
+  }
+
   /* ---------- auth + student data ---------- */
   if (configured) {
     const app = initializeApp(firebaseConfig), auth = getAuth(app), db = getFirestore(app);
@@ -594,7 +737,7 @@
       try {
         const snap = await getDoc(doc(db, "students", user.uid));
         if (snap.exists() && snap.data().blocked) { await signOut(auth); location.replace(LOGIN_PAGE + "#blocked"); return; }
-        if (snap.exists()) showStudent(snap.data());
+        if (snap.exists()) { showStudent(snap.data()); showFees(snap.data(), db); }
         else { showStudent({}); showBanner("You are logged in, but no student record exists for this account in Firestore (students/" + user.uid + ")."); }
       } catch (e) {
         showStudent({});
