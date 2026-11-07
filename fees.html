@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#e9eff9">
+<title>Fees | Student Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg1:#e9eff9;--bg2:#f6f8fc;--card:#fff;--text:#0f1b3d;--muted:#6a7897;--line:#e1e8f4;--blue:#2b5fd9;--blue-soft:rgba(43,95,217,.11);--green:#12a56a;--red:#d6455d;--orange:#e69a1a;--purple:#6d5bd0;--teal:#0e9aa7;--shadow:0 8px 26px rgba(20,40,110,.09)}
+@media(prefers-color-scheme:dark){:root{--bg1:#0e1630;--bg2:#141d3d;--card:#1a2547;--text:#eaf0ff;--muted:#9fb0d6;--line:#2a3862;--blue:#7ea4ff;--blue-soft:rgba(126,164,255,.17);--green:#4fd69c;--red:#ff7b8f;--orange:#ffc25c;--purple:#a99bff;--teal:#4fd1d9;--shadow:0 10px 28px rgba(0,0,0,.4)}}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+body{min-height:100vh;color:var(--text);font-family:Inter,"Segoe UI",system-ui,sans-serif;background:linear-gradient(180deg,var(--bg1),var(--bg2)) fixed;padding:24px 14px 110px}
+body:before{content:"";position:fixed;inset:-10%;z-index:-1;pointer-events:none;background:radial-gradient(40% 32% at 12% 8%,rgba(90,130,255,.2),transparent 70%),radial-gradient(36% 30% at 92% 30%,rgba(120,200,230,.18),transparent 70%)}
+.app{max-width:860px;margin:auto}
+header{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.back{width:44px;height:44px;border-radius:14px;background:var(--card);border:1px solid var(--line);display:grid;place-items:center;color:var(--blue);font-size:22px;text-decoration:none;box-shadow:var(--shadow)}
+.heading{flex:1;min-width:0}h1{font-size:clamp(1.35rem,5vw,1.8rem);font-weight:800}.muted{color:var(--muted)}
+.avatar{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:#fff;background:linear-gradient(145deg,#4f86ff,#2548b8);font-weight:800}
+.hero{background:linear-gradient(120deg,#17327f,#2552c8 58%,#3f7bff);color:#fff;border-radius:24px;padding:22px;margin-bottom:16px;box-shadow:0 14px 34px rgba(37,72,184,.25);overflow:hidden;position:relative}
+.hero:after{content:"";position:absolute;width:180px;height:180px;border-radius:50%;right:-55px;top:-90px;background:#ffffff13}
+.hero small{color:#ffffffbf;font-weight:600;font-size:.82rem}.hero .big{font-size:clamp(1.9rem,8vw,2.6rem);font-weight:800;margin:4px 0 6px}.hero p{color:#ffffffcf;font-size:.9rem;line-height:1.5}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.stat,.panel{background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow)}
+.stat{padding:15px;min-width:0}.stat b{font-size:1.35rem;display:block;overflow-wrap:anywhere}.stat span{font-size:.78rem;color:var(--muted);font-weight:600}
+.stat.bad b{color:var(--red)}.stat.good b{color:var(--green)}
+.panel{padding:18px;margin-bottom:16px}
+.sectionhead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+.sectionhead h2{font-size:1.05rem;font-weight:800}.count{font-size:.8rem;color:var(--muted);font-weight:600}
+.kv div{display:flex;justify-content:space-between;gap:14px;padding:13px 0;border-top:1px solid var(--line)}.kv div:first-child{border-top:0;padding-top:0}.kv div:last-child{padding-bottom:0}
+.kv span{color:var(--muted);font-size:.88rem}.kv b{text-align:right;font-size:.92rem;overflow-wrap:anywhere}
+.alert{border-radius:16px;padding:14px 16px;margin-bottom:16px;font-size:.9rem;line-height:1.5;font-weight:600}
+.alert.due{background:rgba(214,69,93,.1);border:1px solid var(--red);color:var(--red)}
+.alert.soon{background:rgba(230,154,26,.13);border:1px solid var(--orange);color:var(--text)}
+.alert.info{background:var(--blue-soft);border:1px solid var(--blue);color:var(--text)}
+.alert.err{background:rgba(214,69,93,.1);border:1px solid var(--red);color:var(--text)}
+.row{display:flex;gap:13px;align-items:center;padding:14px 0;border-top:1px solid var(--line)}.row:first-child{border-top:0;padding-top:0}.row:last-child{padding-bottom:0}
+.mi{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;flex:none;font-weight:800;font-size:1.1rem}
+.mi.paid{background:rgba(18,165,106,.14);color:var(--green)}.mi.late{background:rgba(214,69,93,.13);color:var(--red)}.mi.soon{background:var(--blue-soft);color:var(--blue)}
+.rt{flex:1;min-width:0}.rt h3{font-size:.95rem;margin-bottom:3px}.rt p{font-size:.8rem;color:var(--muted);line-height:1.4}
+.rr{text-align:right;flex:none}.rr b{display:block;font-size:.95rem;margin-bottom:4px}
+.pill{display:inline-block;font-size:.7rem;font-weight:800;padding:5px 9px;border-radius:99px}
+.pill.paid{background:rgba(18,165,106,.14);color:var(--green)}.pill.late{background:rgba(214,69,93,.13);color:var(--red)}.pill.soon{background:var(--blue-soft);color:var(--blue)}
+.empty{text-align:center;padding:30px 14px;color:var(--muted);font-size:.9rem;line-height:1.5}
+nav{position:fixed;z-index:10;left:50%;transform:translateX(-50%);bottom:10px;width:min(680px,calc(100% - 20px));display:grid;grid-template-columns:repeat(5,1fr);padding:8px;border-radius:26px;background:linear-gradient(135deg,#1c2d5a,#2b4691);box-shadow:0 14px 34px rgba(20,35,90,.38)}
+nav a{display:grid;justify-items:center;gap:4px;padding:8px 2px;border-radius:17px;color:#ffffffc9;text-decoration:none;font-size:.66rem;font-weight:700;text-align:center}
+nav a.active{background:#fff;color:#1f3f9e}
+@media(max-width:480px){body{padding-top:16px}.stats{gap:7px}.stat{padding:12px 10px}.stat b{font-size:1.1rem}.panel{padding:14px}.mi{width:40px;height:40px}nav a{font-size:.59rem}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <a class="back" href="dashboard.html" aria-label="Back to dashboard">‹</a>
+    <div class="heading"><h1>Fees</h1><p class="muted" style="font-size:.84rem;margin-top:4px">Your fee, due dates and payment history</p></div>
+    <div class="avatar" id="avatar">S</div>
+  </header>
+
+  <div class="alert err" id="err" role="alert" hidden></div>
+
+  <section class="hero">
+    <small>Monthly fee</small>
+    <div class="big" id="monthly">—</div>
+    <p id="heroNote">Loading your fee details…</p>
+  </section>
+
+  <div class="alert due" id="dueAlert" role="status" hidden></div>
+  <div class="alert soon" id="soonAlert" role="status" hidden></div>
+
+  <section class="stats" aria-label="Fee summary">
+    <div class="stat"><b id="paidTotal">—</b><span>Total paid</span></div>
+    <div class="stat" id="dueBox"><b id="dueNow">—</b><span>Due now</span></div>
+    <div class="stat"><b id="nextDue">—</b><span>Next due date</span></div>
+  </section>
+
+  <section class="panel">
+    <div class="sectionhead"><h2>Your fee details</h2></div>
+    <div class="kv" id="details"></div>
+  </section>
+
+  <section class="panel">
+    <div class="sectionhead"><h2>Payment history</h2><span class="count" id="histCount"></span></div>
+    <div id="history"><div class="empty">Loading…</div></div>
+  </section>
+
+  <section class="panel" id="otherPanel" hidden>
+    <div class="sectionhead"><h2>Other fees</h2><span class="count">One-time charges</span></div>
+    <div id="other"></div>
+  </section>
+</div>
+
+<nav aria-label="Main navigation">
+  <a href="dashboard.html">⌂<span>Home</span></a>
+  <a href="attendance.html">▦<span>Attendance</span></a>
+  <a class="active" href="fees.html" aria-current="page">₹<span>Fees</span></a>
+  <a href="study-materials.html">▤<span>Materials</span></a>
+  <a href="tests.html">▣<span>Tests</span></a>
+</nav>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* Keep this config identical to dashboard.html. */
+const firebaseConfig = {
+  apiKey: "AIzaSyDbxUTsBSeFIevnbJadEHkubyKBRHdDM94",
+  authDomain: "geniusinstitute-unnao.firebaseapp.com",
+  projectId: "geniusinstitute-unnao",
+  storageBucket: "geniusinstitute-unnao.firebasestorage.app",
+  messagingSenderId: "457602291145",
+  appId: "1:457602291145:web:678518a46dd475dd540418",
+  measurementId: "G-10RZJQMHR7"
+};
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const inr = (n) => "₹" + Number(n || 0).toLocaleString("en-IN");
+const pad = (n) => String(n).padStart(2, "0"), ymd = (d) => d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+const fmt = (d) => d.toLocaleDateString("en-IN", { day:"numeric", month:"short", year:"numeric" });
+const fmtLong = (d) => d.toLocaleDateString("en-IN", { day:"numeric", month:"long", year:"numeric" });
+const monthName = (d) => d.toLocaleDateString("en-IN", { month:"long", year:"numeric" });
+const ord = (n) => n + (["th","st","nd","rd"][(n % 100 > 10 && n % 100 < 14) ? 0 : (n % 10 < 4 ? n % 10 : 0)] || "th");
+const fromStr = (s) => { const d = new Date(String(s) + "T00:00:00"); return isNaN(d) ? null : d; };
+
+/* Same billing rules as the admin panel: the first month is paid when the account is created,
+   then a fee falls due on the same date every month. */
+function joinedOf(s) {
+  if (s.joinedOn) return fromStr(s.joinedOn);
+  const c = s.createdAt && s.createdAt.toDate ? s.createdAt.toDate() : null;
+  return c ? new Date(c.getFullYear(), c.getMonth(), c.getDate()) : null;
+}
+function cyclesOf(s) {
+  const j = joinedOf(s); if (!j) return []; const out = [], now = new Date();
+  for (let k = 0; k < 600; k++) {
+    const y = j.getFullYear(), m = j.getMonth() + k, dim = new Date(y, m + 1, 0).getDate(), due = new Date(y, m, Math.min(j.getDate(), dim));
+    out.push({ k, key:"m" + due.getFullYear() + pad(due.getMonth() + 1), due }); if (due > now) break;
+  }
+  return out;
+}
+function showError(m) { $("err").textContent = m; $("err").hidden = false; }
+
+function render(s, plan) {
+  const amt = plan ? Number(plan.monthly) || 0 : 0, now = new Date(), j = joinedOf(s), cyc = cyclesOf(s), paidMap = s.feePaid || {};
+  const status = (c) => c.k === 0 ? { rec:{ on:ymd(c.due), amt, adm:true } } : paidMap[c.key] ? { rec:paidMap[c.key] } : { rec:null };
+  const unpaid = amt ? cyc.filter((c) => c.k >= 1 && c.due <= now && !paidMap[c.key]) : [];
+  const upcoming = cyc.find((c) => c.due > now);
+
+  /* one-time fees */
+  const once = Array.isArray(s.fees) ? s.fees : [];
+  const onceDue = once.filter((f) => !f.paid && (!f.due || f.due <= ymd(now))).reduce((a, f) => a + (Number(f.amt) || 0), 0);
+  const onceUnpaidAll = once.filter((f) => !f.paid);
+
+  /* totals */
+  const paidMonthly = amt ? cyc.filter((c) => c.k === 0 || paidMap[c.key]).reduce((a, c) => a + (c.k === 0 ? amt : Number(paidMap[c.key].amt) || amt), 0) : 0;
+  const paidOnce = once.filter((f) => f.paid).reduce((a, f) => a + (Number(f.amt) || 0), 0);
+  const dueNow = unpaid.length * amt + onceDue;
+
+  /* hero + summary */
+  $("monthly").textContent = amt ? inr(amt) : "Not set yet";
+  $("heroNote").textContent = amt ? "Assigned for Class " + (s.class || "—") + ". Due on the " + (j ? ord(j.getDate()) : "same date") + " of every month." : "Your institute has not set the monthly fee for your class yet. Please contact the office.";
+  $("paidTotal").textContent = inr(paidMonthly + paidOnce);
+  $("dueNow").textContent = inr(dueNow); $("dueBox").classList.toggle("bad", dueNow > 0); $("dueBox").classList.toggle("good", dueNow === 0 && amt > 0);
+  $("nextDue").textContent = upcoming && amt ? fmt(upcoming.due) : "—";
+
+  /* alerts */
+  if (dueNow > 0) {
+    const parts = []; if (unpaid.length) parts.push(unpaid.length + " month" + (unpaid.length > 1 ? "s" : "") + " of monthly fee (last due " + fmt(unpaid[unpaid.length - 1].due) + ")"); if (onceDue) parts.push("other fees " + inr(onceDue));
+    $("dueAlert").textContent = "Fee pending: " + inr(dueNow) + " — " + parts.join(" and ") + ". Please pay at the institute."; $("dueAlert").hidden = false;
+  }
+  if (amt && !dueNow && upcoming && (upcoming.due - now) / 864e5 <= 5) { $("soonAlert").textContent = "Your next fee of " + inr(amt) + " is due on " + fmtLong(upcoming.due) + "."; $("soonAlert").hidden = false; }
+
+  /* fee details */
+  const rows = [["Class", s.class ? "Class " + s.class : "—"], ["Joining date", j ? fmtLong(j) : "Not available"], ["Monthly fee", amt ? inr(amt) : "Not set yet"],
+    ["Fee due date", j ? "The " + ord(j.getDate()) + " of every month" : "—"], ["First month", j ? "Paid at admission on " + fmt(j) : "—"]];
+  $("details").innerHTML = rows.map((r) => `<div><span>${esc(r[0])}</span><b>${esc(r[1])}</b></div>`).join("");
+
+  /* payment history (newest first) */
+  if (!amt || !j) {
+    $("history").innerHTML = `<div class="empty">${!j ? "Your joining date is not available yet." : "Your payment history will appear here once the monthly fee is set for your class."}</div>`; $("histCount").textContent = "";
+  } else {
+    const items = cyc.slice().reverse();
+    $("histCount").textContent = cyc.filter((c) => c.k === 0 || paidMap[c.key]).length + " paid";
+    $("history").innerHTML = items.map((c) => {
+      const { rec } = status(c), late = !rec && c.due <= now;
+      const cls = rec ? "paid" : late ? "late" : "soon", icon = rec ? "✓" : late ? "!" : "◷";
+      const sub = rec ? (c.k === 0 ? "Paid at admission · " + fmt(c.due) : "Paid on " + (fromStr(rec.on) ? fmt(fromStr(rec.on)) : esc(rec.on))) : "Due " + fmt(c.due);
+      return `<div class="row"><div class="mi ${cls}">${icon}</div><div class="rt"><h3>${esc(monthName(c.due))}</h3><p>${esc(sub)}</p></div>
+        <div class="rr"><b>${inr(rec && rec.amt ? rec.amt : amt)}</b><span class="pill ${cls}">${rec ? "Paid" : late ? "Pending" : "Upcoming"}</span></div></div>`;
+    }).join("");
+  }
+
+  /* other fees */
+  if (once.length) {
+    $("otherPanel").hidden = false;
+    $("other").innerHTML = once.map((f) => { const d = f.due ? fromStr(f.due) : null, late = !f.paid && (!d || d <= now), cls = f.paid ? "paid" : late ? "late" : "soon";
+      return `<div class="row"><div class="mi ${cls}">${f.paid ? "✓" : late ? "!" : "◷"}</div><div class="rt"><h3>${esc(f.label || "Fee")}</h3><p>${d ? "Due " + esc(fmt(d)) : "No due date"}</p></div>
+        <div class="rr"><b>${inr(f.amt)}</b><span class="pill ${cls}">${f.paid ? "Paid" : late ? "Due" : "Upcoming"}</span></div></div>`; }).join("");
+  }
+}
+
+const app = initializeApp(firebaseConfig), auth = getAuth(app), db = getFirestore(app);
+onAuthStateChanged(auth, async (user) => {
+  if (!user) { location.replace("login.html"); return; }
+  try {
+    const snap = await getDoc(doc(db, "students", user.uid));
+    if (!snap.exists()) { showError("No student profile was found for this account (students/" + user.uid + ")."); $("history").innerHTML = ""; return; }
+    const s = snap.data();
+    if (s.blocked) { await signOut(auth); location.replace("login.html#blocked"); return; }
+    $("avatar").textContent = (String(s.name || s.studentName || "S").trim().charAt(0) || "S").toUpperCase();
+    let plan = null;
+    try { const p = await getDoc(doc(db, "feeStructure", String(s.class || ""))); if (p.exists()) plan = p.data(); }
+    catch (e) { showError("Could not read the fee plan for your class (" + (e.code || e.message) + ")."); }
+    render(s, plan);
+  } catch (e) {
+    showError("Could not load your fee details (" + (e.code || e.message) + ").");
+    $("history").innerHTML = "";
+  }
+});
+</script>
+</body>
+</html>

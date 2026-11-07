@@ -330,6 +330,7 @@
       <button class="avatar" id="avatar" type="button" aria-label="Open profile menu" aria-haspopup="true" aria-expanded="false" aria-controls="pdrop">·</button>
       <div class="pdrop" id="pdrop" role="menu" hidden>
         <button role="menuitem" type="button" id="logout"><svg class="i"><use href="#i-out"/></svg>Logout</button>
+      <a role="menuitem" href="profile.html"><svg class="i"><use href="#i-user"/></svg>My Profile</a>
       </div>
     </div>
   </header>
@@ -360,11 +361,11 @@
 
     <div class="grid3">
       <a class="card" href="fees.html"><div class="mh"><div class="tile t-orange"><svg class="i"><use href="#i-rupee"/></svg></div>Fees</div>
-        <div class="val" id="hFee">₹0</div><div class="sub">Due Amount</div><div class="down" id="hFeeDue"></div></a>
+        <div class="val" id="hFee">₹0</div><div class="sub" id="hFeeLbl">Monthly Fee</div><div class="down" id="hFeeDue"></div></a>
       <a class="card" href="tests.html"><div class="mh"><div class="tile t-purple"><svg class="i"><use href="#i-clip"/></svg></div>Tests</div>
         <div class="val" id="hTests">0</div><div class="sub">Tests Completed</div><div class="link" id="hTestNext"></div></a>
       <a class="card" href="study-materials.html"><div class="mh"><div class="tile t-red"><svg class="i"><use href="#i-book"/></svg></div>Study Materials</div>
-        <div class="val" id="hMats">0</div><div class="sub">New Materials</div><span class="link">View all <svg class="i"><use href="#i-chev"/></svg></span></a>
+        <div class="val" id="hMats">0</div><div class="sub" id="hMatsLbl">New Materials</div><span class="link">View all <svg class="i"><use href="#i-chev"/></svg></span></a>
     </div>
 
     <div class="card cal">
@@ -434,7 +435,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-  import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { getFirestore, doc, getDoc, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
   // Paste the SAME config you used in login.html
   const firebaseConfig = {
@@ -451,10 +452,6 @@
 
   /* ---------- sample data for the cards (replace with real data later) ---------- */
   const FEES = []; // filled automatically from the class fee plan (see showFees below)
-  const MATS = [
-    { t:"Quadratic Equations - Notes", d:"Maths · PDF", ago:"2h ago" },
-    { t:"Newton's Laws - Practice Sheet", d:"Physics · PDF", ago:"1d ago" },
-    { t:"Organic Chemistry - Video Lecture", d:"Chemistry · Video", ago:"2d ago" } ];
   const UP = { t:"Mathematics - Chapter Test", date:"05 Nov 2026", time:"10:00 AM" };
   const TESTS_DONE = 8;
   /* ------------------------------------------------------------------------------ */
@@ -613,8 +610,8 @@
   $("hFeeDue").className = next ? "down" : "up";
   countTo($("hTests"), TESTS_DONE, (n) => n, 1000); $("hTestNext").textContent = "Next: " + UP.date;
   $("utTitle").textContent = UP.t; $("utDate").textContent = UP.date; $("utTime").textContent = UP.time;
-  $("recent").innerHTML = MATS.map((n, i) => `<div class="nrow" style="--d:${150 + i * 120}ms"><span class="dot"></span><span class="tx"><strong>${esc(n.t)}</strong><small>${esc(n.d)}</small></span><span class="ago">${esc(n.ago)}</span></div>`).join("");
-  countTo($("hMats"), MATS.length, (n) => n, 1000);
+  $("recent").innerHTML = '<p class="sub" style="padding:8px 0">Study materials appear here once your teacher shares them.</p>';
+  countTo($("hMats"), 0, (n) => n, 1000);
   renderAtt();
 
   /* ---------- profile menu ---------- */
@@ -709,11 +706,14 @@
   }
   async function showFees(s, db) {
     let plan = null; try { const p = await getDoc(doc(db, "feeStructure", String(s.class))); if (p.exists()) plan = p.data(); } catch (e) {}
-    const amt = plan && plan.subjects ? (s.subjects || []).reduce((a, x) => a + (Number(plan.subjects[x]) || 0), 0) : 0, now = new Date(), cyc = amt ? cyclesOf(s) : [];
+    const amt = plan ? Number(plan.monthly) || 0 : 0, now = new Date(), cyc = amt ? cyclesOf(s) : [];
     const unpaid = cyc.filter((c) => c.k >= 1 && c.due <= now && !(s.feePaid && s.feePaid[c.key])), upcoming = cyc.find((c) => c.due > now);
     const onceList = (s.fees || []).filter((f) => !f.paid && (!f.due || f.due <= ymdS(now)));
     const once = onceList.reduce((a, f) => a + (f.amt || 0), 0), due = amt * unpaid.length + once;
-    countTo($("hFee"), due, inr, 1200);
+    // the card always shows the monthly fee set by the admin; with dues it turns red and the due amount is written below
+    countTo($("hFee"), amt, inr, 1200);
+    $("hFee").style.color = due > 0 ? "var(--red)" : "";
+    const fl = $("hFeeLbl"); fl.className = due > 0 ? "down" : "sub"; fl.textContent = due > 0 ? "Due amount: " + inr(due) : "Monthly Fee";
     const fd = $("hFeeDue");
     if (unpaid.length) { fd.className = "down"; fd.textContent = "Due since " + dFmtS(unpaid[0].due); }
     else if (once) { fd.className = "down"; fd.textContent = "Other fees due"; }
@@ -729,6 +729,25 @@
     renderCal(0);
   }
 
+  /* ---------- study materials uploaded by teachers (same "studyMaterials" collection as study-materials.html) ---------- */
+  const agoOf = (t) => { const m = Math.floor((Date.now() - t.getTime()) / 60000); return m < 1 ? "just now" : m < 60 ? m + "m ago" : m < 1440 ? Math.floor(m / 60) + "h ago" : Math.floor(m / 1440) + "d ago"; };
+  async function showMaterials(s, db) {
+    const cls = String(s.class ?? "").trim(); let list = [];
+    if (cls) {
+      try {
+        const snap = await getDocs(query(collection(db, "studyMaterials"), where("classes", "array-contains", cls)));
+        list = snap.docs.map((x) => { const v = x.data(), t = v.createdAt && v.createdAt.toDate ? v.createdAt.toDate() : null;
+          return { t:v.title || "Untitled material", d:[v.subject, v.type].filter(Boolean).join(" · "), url:String(v.url || ""), date:t }; })
+          .sort((a, b) => (b.date ? b.date.getTime() : 0) - (a.date ? a.date.getTime() : 0));
+      } catch (e) { $("recent").innerHTML = '<p class="sub" style="padding:8px 0">Could not load study materials (' + esc(e.code || e.message) + ").</p>"; return; }
+    }
+    const week = Date.now() - 7 * 864e5, fresh = list.filter((m) => m.date && m.date.getTime() >= week).length;
+    countTo($("hMats"), fresh || list.length, (n) => n, 1000); $("hMatsLbl").textContent = fresh ? "New Materials" : "Total Materials";
+    $("recent").innerHTML = list.length ? list.slice(0, 3).map((m, i) => { const ext = /^https?:\/\//i.test(m.url);
+      return `<a class="nrow" href="${ext ? esc(m.url) : "study-materials.html"}"${ext ? ' target="_blank" rel="noopener noreferrer"' : ""} style="--d:${150 + i * 120}ms"><span class="dot"></span><span class="tx"><strong>${esc(m.t)}</strong><small>${esc(m.d)}</small></span><span class="ago">${m.date ? esc(agoOf(m.date)) : ""}</span></a>`; }).join("")
+      : '<p class="sub" style="padding:8px 0">No study materials have been shared for your class yet.</p>';
+  }
+
   /* ---------- auth + student data ---------- */
   if (configured) {
     const app = initializeApp(firebaseConfig), auth = getAuth(app), db = getFirestore(app);
@@ -737,7 +756,7 @@
       try {
         const snap = await getDoc(doc(db, "students", user.uid));
         if (snap.exists() && snap.data().blocked) { await signOut(auth); location.replace(LOGIN_PAGE + "#blocked"); return; }
-        if (snap.exists()) { showStudent(snap.data()); showFees(snap.data(), db); }
+        if (snap.exists()) { showStudent(snap.data()); showFees(snap.data(), db); showMaterials(snap.data(), db); }
         else { showStudent({}); showBanner("You are logged in, but no student record exists for this account in Firestore (students/" + user.uid + ")."); }
       } catch (e) {
         showStudent({});

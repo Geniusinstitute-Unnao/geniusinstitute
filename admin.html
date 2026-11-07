@@ -135,7 +135,7 @@
   <section data-view id="v-home">
     <div class="ph"><h2>Welcome</h2><p>Pick what you want to do. Everything here is saved to your Firebase project instantly.</p></div>
     <div class="stats" id="hStats"></div>
-    <div class="card"><h3>Pending fees</h3><p class="hint">Worked out automatically from each class's fee plan, each student's subjects and their monthly due date.</p><div id="hDues"></div></div>
+    <div class="card"><h3>Pending fees</h3><p class="hint">Worked out automatically from each class's monthly fee and each student's due date.</p><div id="hDues"></div></div>
     <div class="tasks">
       <button class="task" data-go="stu"><span class="ic"><svg class="i"><use href="#i-users"/></svg></span><span><b>Manage students</b><small>Search, edit, block, make a teacher</small></span></button>
       <button class="task" data-go="att"><span class="ic"><svg class="i"><use href="#i-cal"/></svg></span><span><b>Mark attendance</b><small>A whole class for a day, or one student</small></span></button>
@@ -148,7 +148,8 @@
 
   <!-- STUDENTS -->
   <section data-view id="v-stu" hidden>
-    <div class="ph"><h2>Students</h2><p>Tap <b>Manage</b> on a student to edit their details, block them, or make them a teacher. Tick several students to change many at once.</p></div>
+    <div class="ph"><h2>Students</h2><p>Add new students here. Tap <b>Manage</b> on a student to edit their details, block them, or make them a teacher. Tick several students to change many at once.</p></div>
+    <div class="btns" style="margin-bottom:16px"><button class="btn" id="addStu">+ Add student</button></div>
     <div class="card">
       <div class="row2">
         <div class="field" style="margin:0"><label for="fq">Search</label><input class="in" id="fq" placeholder="Name or mobile number"></div>
@@ -185,7 +186,7 @@
 
   <!-- FEES -->
   <section data-view id="v-fee" hidden>
-    <div class="ph"><h2>Fees</h2><p>Set a monthly fee for every subject in every class. A student pays the total of the subjects they chose. The first month is paid when the account is created, and the next fee falls due on the same date every month.</p></div>
+    <div class="ph"><h2>Fees</h2><p>Set one monthly fee for each class. Every student in that class pays it. The first month is paid when the account is created, and the next fee falls due on the same date every month.</p></div>
     <div class="segc" id="feeMode"><button data-m="dues" class="on">Monthly dues</button><button data-m="plan">Fee plan</button><button data-m="once">One-time fees</button></div>
 
     <div id="fm-dues">
@@ -201,15 +202,10 @@
     </div>
 
     <div id="fm-plan" hidden>
-      <div class="card">
-        <div class="stp">Step 1 · Choose class</div><div class="segc" id="planClasses"></div>
-        <div class="stp">Step 2 · Monthly fee for each subject in <span id="planName"></span></div>
-        <div id="planRows"></div><p class="sub" id="planNote" style="margin-top:8px"></p>
-        <div class="stp" style="margin-top:14px">Step 3 · Save</div>
-        <div class="btns"><button class="btn" id="planSave">Save fee plan</button><button class="btn soft" id="planAll">Copy these prices to all classes</button></div>
-      </div>
+      <div class="card"><h3>Monthly fee for each class</h3><p class="hint">Enter the amount every student of that class pays each month. Leave a class empty if it has no fee.</p>
+        <div id="planRows"></div>
+        <button class="btn" id="planSave" style="margin-top:14px">Save fee plan</button></div>
     </div>
-
     <div id="fm-once" hidden>
       <div class="card"><h3>One-time fees</h3><p class="hint">Use this for extra charges such as exam or book fees. These are separate from the monthly fee.</p>
         <div class="row2">
@@ -262,6 +258,24 @@
   </section>
 </div>
 
+<!-- ADD STUDENT DIALOG -->
+<dialog id="dAdd"><div class="dbody"><div class="dhead"><h3>Add a student</h3><button class="x" id="addX" aria-label="Close">✕</button></div>
+  <p class="sub" style="margin-bottom:14px">This creates the login. The student signs in with their mobile number and date of birth.</p>
+  <form id="aForm" novalidate>
+    <div class="field"><label for="crName">Student name</label><input class="in" id="crName" autocomplete="off"></div>
+    <div class="row2"><div class="field" style="margin:0"><label for="crMobile">Mobile number (login ID)</label><input class="in" id="crMobile" type="tel" inputmode="numeric" maxlength="10" placeholder="10 digits"></div>
+      <div class="field" style="margin:0"><label for="crDob">Date of birth (password)</label><input class="in" id="crDob" type="date"></div></div>
+    <div class="field" style="margin-top:14px"><label for="crMail">Gmail</label><input class="in" id="crMail" type="email" placeholder="name@gmail.com"></div>
+    <div class="row2"><div class="field" style="margin:0"><label for="crParent">Parent's name</label><input class="in" id="crParent"></div>
+      <div class="field" style="margin:0"><label for="crParentPh">Parent's contact number (WhatsApp)</label><input class="in" id="crParentPh" type="tel" inputmode="numeric" maxlength="10" placeholder="10 digits"></div></div>
+    <div class="row2" style="margin-top:14px"><div class="field" style="margin:0"><label for="crClass">Class</label><select class="in" id="crClass"></select></div>
+      <div class="field" style="margin:0"><label for="crRole">Post</label><select class="in" id="crRole"><option value="student">Student</option><option value="teacher">Teacher</option></select></div>
+      <div class="field" style="margin:0"><label for="crJoin">Joining date (monthly fee date)</label><input class="in" id="crJoin" type="date"></div></div>
+    <div class="field" style="margin-top:14px"><label>Subjects</label><div class="chips" id="crSubs" style="margin:0"></div></div>
+    <div class="err" id="crErr" role="alert"></div>
+    <button class="btn" type="submit" id="crBtn" style="width:100%">Create account</button>
+  </form></div></dialog>
+
 <!-- STUDENT DIALOG -->
 <dialog id="dStu"><div class="dbody"><div class="dhead"><h3 id="eTitle">Student</h3><button class="x" id="eX" aria-label="Close">✕</button></div>
   <form id="eForm">
@@ -269,6 +283,7 @@
     <div class="row2"><div class="field" style="margin:0"><label for="eMobile">Mobile (login ID, cannot change)</label><input class="in" id="eMobile" readonly></div><div class="field" style="margin:0"><label for="eDob">Date of birth (password)</label><input class="in" id="eDob" readonly></div></div>
     <div class="field"><label for="eMail">Gmail</label><input class="in" id="eMail" type="email"></div>
     <div class="field"><label for="eParent">Parent's name</label><input class="in" id="eParent"></div>
+    <div class="field"><label for="eParentPh">Parent's contact number (WhatsApp)</label><input class="in" id="eParentPh" type="tel" inputmode="numeric" maxlength="10" placeholder="10 digits"></div>
     <div class="field"><label for="eJoin">Joining date (the monthly fee is due on this date every month)</label><input class="in" id="eJoin" type="date"></div>
     <div class="row2"><div class="field" style="margin:0"><label for="eClass">Class</label><select class="in" id="eClass"></select></div>
       <div class="field" style="margin:0"><label for="eRole">Post</label><select class="in" id="eRole"><option value="student">Student</option><option value="teacher">Teacher</option></select></div></div>
@@ -306,7 +321,7 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword, deleteUser } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import { getFirestore, collection, getDocs, getDoc, setDoc, updateDoc, addDoc, deleteDoc, doc, query, orderBy, limit, writeBatch, serverTimestamp, arrayUnion, deleteField }
     from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -320,6 +335,8 @@
     measurementId: "G-10RZJQMHR7"
   };
   const app = initializeApp(firebaseConfig), auth = getAuth(app), db = getFirestore(app);
+  // a second, separate app lets the admin create student logins without being signed out
+  const creator = getAuth(initializeApp(firebaseConfig, "creator")), EMAIL_DOMAIN = "students.institute.app";
   const $ = (id) => document.getElementById(id);
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
   const CLASSES = ["6","7","8","9","10","11","12","Dropper"], SUBJECTS = ["Maths","Science","Physics","Chemistry","Biology","English"], DAYS = ["Mon","Tue","Wed","Thu","Fri","Sat"];
@@ -334,7 +351,7 @@
   const pickedIn = (id) => [...$(id).querySelectorAll("input:checked")].map((c) => c.value);
   const seg = (id, fn) => $(id).addEventListener("click", (e) => { const b = e.target.closest("button"); if (!b) return; $(id).querySelectorAll("button").forEach((x) => x.classList.toggle("on", x === b)); fn(b); });
   const closeBtn = (btn, dlg) => $(btn).addEventListener("click", () => $(dlg).close());
-  ["eX:dStu","feeX:dFee","newX:dNew","mX:dMarks","payX:dPay"].forEach((p) => closeBtn(...p.split(":")));
+  ["eX:dStu","feeX:dFee","newX:dNew","mX:dMarks","payX:dPay","addX:dAdd"].forEach((p) => closeBtn(...p.split(":")));
 
   /* ---------- admin login ---------- */
   $("gForm").addEventListener("submit", async (e) => { e.preventDefault(); $("gErr").textContent = "";
@@ -356,7 +373,6 @@
     ["dClass","aClass","fbClass","tsClass","rkClass","eClass"].forEach((id) => ($(id).innerHTML = opts(CLASSES)));
     $("tsSub").innerHTML = SUBJECTS.map((x) => `<option>${x}</option>`).join("");
     $("ttClasses").innerHTML = CLASSES.map((c, i) => `<button data-c="${c}" class="${i ? "" : "on"}">Class ${c}</button>`).join("");
-    $("planClasses").innerHTML = CLASSES.map((c, i) => `<button data-c="${c}" class="${i ? "" : "on"}">Class ${c}</button>`).join("");
     $("nCls").innerHTML = CLASSES.map((c) => `<label><input type="checkbox" value="${c}">Class ${c}</label>`).join("");
     const today = new Date().toISOString().slice(0, 10); $("dDate").value = today; $("aMonth").value = today.slice(0, 7); $("tsDate").value = today;
     renderHome(); renderStu(); renderFeeOver(); renderDues(); renderPlan(); renderNotes(); renderTests(); renderRank(); loadDay(); fillStu(); loadAtt(); loadTT(); autoReminders(false);
@@ -378,7 +394,7 @@
     const stu = students.filter(isStu), te = students.filter((s) => s.role === "teacher").length, bl = students.filter((s) => s.blocked).length;
     const rows = stu.map((s) => ({ s, p:pend(s) })).filter((r) => r.p.amt > 0).sort((a, b) => b.p.amt - a.p.amt), total = rows.reduce((a, r) => a + r.p.amt, 0);
     $("hStats").innerHTML = [[stu.length, "Students"], [te, "Teachers"], [bl, "Blocked"], [inr(total), "Fees pending"], [rows.length, "Students with dues"]].map((x) => `<div class="stat"><b>${x[0]}</b><span>${x[1]}</span></div>`).join("");
-    const none = !Object.keys(plans).length ? '<p class="empty">No fee plan is set yet. Go to <b>Fees → Fee plan</b> and enter the monthly fee for each subject.</p>' : '<p class="empty">🎉 No pending fees right now.</p>';
+    const none = !Object.keys(plans).length ? '<p class="empty">No fee plan is set yet. Go to <b>Fees → Fee plan</b> and enter the monthly fee for each class.</p>' : '<p class="empty">🎉 No pending fees right now.</p>';
     $("hDues").innerHTML = rows.slice(0, 8).map((r) => `<div class="item"><div class="av">${esc((r.s.name || "?").charAt(0).toUpperCase())}</div><div class="tx"><b>${esc(r.s.name)}</b>
       <small>Class ${esc(r.s.class)} · ${r.p.cyc.length ? r.p.cyc.length + " month(s) pending" : ""}${r.p.cyc.length && r.p.once ? " + " : ""}${r.p.once ? "one-time fees" : ""}</small></div><span class="pill wn">${inr(r.p.amt)}</span>
       <button class="btn soft s" data-pay="${r.s.id}">${r.p.cyc.length ? "Collect" : "Open"}</button></div>`).join("") + (rows.length > 8 ? '<div style="margin-top:12px"><button class="btn soft s" data-go="fee">View all ' + rows.length + ' students with dues</button></div>' : "") || none;
@@ -412,20 +428,57 @@
   let cur = null;
   function openStu(s) {
     cur = s; $("eTitle").textContent = s.name || "Student"; $("eName").value = s.name || ""; $("eMobile").value = s.mobile || ""; $("eDob").value = s.dob || ""; $("eMail").value = s.gmail || "";
-    $("eParent").value = s.parentName || ""; { const j = joinedD(s); $("eJoin").value = j && !isNaN(j) ? ymd(j) : ""; } $("eClass").value = s.class || CLASSES[0]; $("eRole").value = s.role || "student";
+    $("eParent").value = s.parentName || ""; $("eParentPh").value = s.parentPhone || ""; { const j = joinedD(s); $("eJoin").value = j && !isNaN(j) ? ymd(j) : ""; } $("eClass").value = s.class || CLASSES[0]; $("eRole").value = s.role || "student";
     $("eSubs").innerHTML = SUBJECTS.map((x) => `<label><input type="checkbox" value="${x}" ${(s.subjects || []).includes(x) ? "checked" : ""}>${x}</label>`).join("");
     $("eBlkT").textContent = s.blocked ? "This student is blocked" : "Block this student";
     $("eBlkP").textContent = s.blocked ? "They cannot log in right now. Unblock to let them back in." : "A blocked student cannot log in until you unblock them.";
     $("eBlk").textContent = s.blocked ? "Unblock student" : "Block student"; $("eBlk").className = "btn " + (s.blocked ? "soft" : "dng"); $("dStu").showModal();
   }
   $("eForm").addEventListener("submit", safe(async (e) => { e.preventDefault();
-    const patch = { name:$("eName").value.trim(), gmail:$("eMail").value.trim().toLowerCase(), parentName:$("eParent").value.trim(), class:$("eClass").value, role:$("eRole").value, subjects:pickedIn("eSubs") };
+    const patch = { name:$("eName").value.trim(), gmail:$("eMail").value.trim().toLowerCase(), parentName:$("eParent").value.trim(), parentPhone:$("eParentPh").value.replace(/\D/g, ""), class:$("eClass").value, role:$("eRole").value, subjects:pickedIn("eSubs") };
+    if (patch.parentPhone && !/^\d{10}$/.test(patch.parentPhone)) return toast("The parent's contact number must be 10 digits");
     if ($("eJoin").value) patch.joinedOn = $("eJoin").value;
     await updateDoc(doc(db, "students", cur.id), patch); Object.assign(cur, patch); $("dStu").close(); renderStu(); renderHome(); renderDues(); toast("Saved"); }));
   $("eBlk").addEventListener("click", safe(async () => { if (!confirm((cur.blocked ? "Unblock " : "Block ") + cur.name + "?")) return;
     await updateDoc(doc(db, "students", cur.id), { blocked:!cur.blocked }); cur.blocked = !cur.blocked; $("dStu").close(); renderStu(); renderHome(); toast(cur.blocked ? "Student blocked" : "Student unblocked"); }));
   $("eFees").addEventListener("click", () => { $("dStu").close(); go("fee"); openPay(cur.id); });
   $("eAtt").addEventListener("click", safe(async () => { $("dStu").close(); go("att"); $("attMode").querySelector('[data-m="one"]').click(); $("aClass").value = cur.class; fillStu(); $("aStu").value = cur.id; await loadAtt(); }));
+
+  /* ---------- add a student (admin creates the login and the record) ---------- */
+  ["crMobile", "crParentPh", "eParentPh"].forEach((id) => $(id).addEventListener("input", (e) => (e.target.value = e.target.value.replace(/\D/g, "").slice(0, 10))));
+  $("addStu").addEventListener("click", () => {
+    ["crName","crMobile","crDob","crMail","crParent","crParentPh"].forEach((id) => ($(id).value = ""));
+    $("crClass").innerHTML = '<option value="">Choose class</option>' + opts(CLASSES); $("crRole").value = "student"; $("crErr").textContent = "";
+    $("crSubs").innerHTML = SUBJECTS.map((x) => `<label><input type="checkbox" value="${x}">${x}</label>`).join(""); $("crJoin").value = new Date().toISOString().slice(0, 10); $("dAdd").showModal();
+  });
+  $("aForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const v = { name:$("crName").value.trim(), mobile:$("crMobile").value, dob:$("crDob").value, gmail:$("crMail").value.trim().toLowerCase(), parentName:$("crParent").value.trim(), parentPhone:$("crParentPh").value,
+      class:$("crClass").value, role:$("crRole").value, joinedOn:$("crJoin").value, subjects:pickedIn("crSubs") }, err = (m) => ($("crErr").textContent = m);
+    if (!v.name) return err("Enter the student's name.");
+    if (!/^[6-9]\d{9}$/.test(v.mobile)) return err("Enter a valid 10-digit mobile number.");
+    if (!v.dob) return err("Enter the date of birth. It becomes the password.");
+    if (!/^[^\s@]+@gmail\.com$/.test(v.gmail)) return err("Enter a valid Gmail address.");
+    if (!v.parentName) return err("Enter the parent's name.");
+    if (!/^[6-9]\d{9}$/.test(v.parentPhone)) return err("Enter the parent's 10-digit contact number.");
+    if (v.role === "student" && !v.class) return err("Choose a class.");
+    if (v.role === "student" && !v.subjects.length) return err("Choose at least one subject.");
+    if (!v.joinedOn) v.joinedOn = new Date().toISOString().slice(0, 10);
+    err(""); const btn = $("crBtn"); btn.disabled = true; btn.textContent = "Creating…"; let cred;
+    try {
+      cred = await createUserWithEmailAndPassword(creator, v.mobile + "@" + EMAIL_DOMAIN, v.dob);
+      await setDoc(doc(db, "students", cred.user.uid), { ...v, createdAt:serverTimestamp() });
+      await signOut(creator);
+      students.push({ id:cred.user.uid, ...v, createdAt:{ toDate:() => new Date() } });
+      $("dAdd").close(); renderStu(); renderHome(); renderFeeOver(); renderDues(); renderPlan(); toast("Account created for " + v.name);
+    } catch (ex) {
+      if (cred && cred.user) { try { await deleteUser(cred.user); } catch (x) {} }
+      try { await signOut(creator); } catch (x) {}
+      err({ "auth/email-already-in-use":"This mobile number already has an account.", "auth/network-request-failed":"No internet connection.", "auth/operation-not-allowed":"Email/Password sign-in is not enabled in Firebase Authentication.",
+        "permission-denied":"Firestore rules blocked saving. Publish the latest rules (students create: admin only)." }[ex.code] || ("Could not create the account (" + (ex.code || ex.message) + ")."));
+    }
+    btn.disabled = false; btn.textContent = "Create account";
+  });
 
   /* ---------- attendance ---------- */
   seg("attMode", (b) => { $("att1").hidden = b.dataset.m !== "day"; $("att2").hidden = b.dataset.m !== "one"; });
@@ -516,7 +569,7 @@
   const MONN = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"], dFmt = (d) => d.getDate() + " " + MONN[d.getMonth()] + " " + d.getFullYear();
   const ord = (n) => n + (["th","st","nd","rd"][(n % 100 > 10 && n % 100 < 14) ? 0 : (n % 10 < 4 ? n % 10 : 0)] || "th");
   const isStu = (s) => (s.role || "student") === "student";
-  const mFee = (s) => { const p = plans[s.class]; return p && p.subjects ? (s.subjects || []).reduce((a, x) => a + (Number(p.subjects[x]) || 0), 0) : 0; };
+  const mFee = (s) => Number(plans[s.class] && plans[s.class].monthly) || 0;
   const joinedD = (s) => { if (s.joinedOn) return new Date(s.joinedOn + "T00:00:00"); const c = s.createdAt && s.createdAt.toDate ? s.createdAt.toDate() : null; return c ? new Date(c.getFullYear(), c.getMonth(), c.getDate()) : null; };
   function cycles(s) {
     const j = joinedD(s); if (!j || isNaN(j)) return []; const out = [], now = new Date();
@@ -532,21 +585,16 @@
   }
   seg("feeMode", (b) => { ["dues","plan","once"].forEach((m) => ($("fm-" + m).hidden = m !== b.dataset.m)); });
 
-  /* fee plan: monthly price per subject, per class */
-  let planClass = CLASSES[0];
-  seg("planClasses", (b) => { planClass = b.dataset.c; renderPlan(); });
+  /* fee plan: one monthly fee per class */
   function renderPlan() {
-    const p = (plans[planClass] && plans[planClass].subjects) || {}; $("planName").textContent = "Class " + planClass;
-    $("planRows").innerHTML = SUBJECTS.map((x) => `<div class="item"><div class="tx"><b>${x}</b><small>Monthly fee. Leave empty if this subject is not taught.</small></div>
-      <div style="display:flex;align-items:center;gap:6px;font-weight:700">₹<input class="in" style="width:130px" type="number" min="0" data-sub="${x}" value="${p[x] ?? ""}" aria-label="Monthly fee for ${x}"></div></div>`).join("");
-    $("planNote").textContent = students.filter((st) => st.class === planClass && isStu(st)).length + " student(s) in this class. Each pays the total of the subjects they chose.";
+    $("planRows").innerHTML = CLASSES.map((c) => { const n = students.filter((s) => s.class === c && isStu(s)).length, v = plans[c] && plans[c].monthly;
+      return `<div class="item"><div class="tx"><b>Class ${c}</b><small>${n} student(s)</small></div><div style="display:flex;align-items:center;gap:6px;font-weight:700">₹<input class="in" style="width:140px" type="number" min="0" data-cls="${c}" value="${v ?? ""}" aria-label="Monthly fee for Class ${c}"><span class="sub">per month</span></div></div>`; }).join("");
   }
-  const readPlan = () => { const o = {}; $("planRows").querySelectorAll("input").forEach((i) => { if (i.value !== "") o[i.dataset.sub] = Number(i.value); }); return o; };
-  const afterPlan = () => { renderHome(); renderDues(); renderPlan(); };
-  $("planSave").addEventListener("click", safe(async () => { const o = readPlan();
-    await setDoc(doc(db, "feeStructure", planClass), { class:planClass, subjects:o, updatedAt:serverTimestamp() }); plans[planClass] = { class:planClass, subjects:o }; afterPlan(); toast("Fee plan saved for Class " + planClass); }));
-  $("planAll").addEventListener("click", safe(async () => { const o = readPlan(); if (!confirm("Use these prices for ALL classes? This replaces every class's fee plan.")) return;
-    await runBatch(CLASSES, (b, c) => b.set(doc(db, "feeStructure", c), { class:c, subjects:o, updatedAt:serverTimestamp() })); CLASSES.forEach((c) => (plans[c] = { class:c, subjects:o })); afterPlan(); toast("Fee plan copied to all classes"); }));
+  $("planSave").addEventListener("click", safe(async () => {
+    const rows = [...$("planRows").querySelectorAll("input")].map((i) => ({ c:i.dataset.cls, v:i.value })).filter((r) => r.v !== "" || plans[r.c]);
+    await runBatch(rows, (b, r) => b.set(doc(db, "feeStructure", r.c), { class:r.c, monthly:Number(r.v) || 0, updatedAt:serverTimestamp() }));
+    rows.forEach((r) => (plans[r.c] = { class:r.c, monthly:Number(r.v) || 0 })); renderHome(); renderDues(); renderPlan(); toast("Fee plan saved");
+  }));
 
   /* monthly dues list */
   function renderDues() {
@@ -555,7 +603,7 @@
       .filter((r) => k === "all" || (k === "pending" && r.p.cyc.length) || (k === "ok" && r.amt && !r.p.cyc.length) || (k === "noplan" && !r.amt)).sort((a, b) => byName(a.s, b.s));
     $("dueList").innerHTML = l.map((r) => { const j = joinedD(r.s);
       return `<div class="item"><div class="tx"><b>${esc(r.s.name)}</b><small>Class ${esc(r.s.class)} · ${esc((r.s.subjects || []).join(", ") || "no subjects")}</small>
-        <small>${r.amt ? inr(r.amt) + " per month" + (j && !isNaN(j) ? " · due on the " + ord(j.getDate()) : " · no joining date") : "No fee plan for this class and these subjects"}</small></div>
+        <small>${r.amt ? inr(r.amt) + " per month" + (j && !isNaN(j) ? " · due on the " + ord(j.getDate()) : " · no joining date") : "No monthly fee set for this class"}</small></div>
         <span class="pill ${!r.amt ? "sc" : r.p.cyc.length ? "wn" : "ok"}">${!r.amt ? "No plan" : r.p.cyc.length ? "Pending " + inr(r.p.monthly) + " (" + r.p.cyc.length + " mo)" : "Up to date"}</span>
         <button class="btn soft s" data-pay="${r.s.id}">Fees</button></div>`; }).join("") || '<p class="empty">No students match.</p>';
   }
@@ -568,8 +616,8 @@
   function renderPay() {
     const s = payStu, amt = mFee(s), j = joinedD(s); $("payTitle").textContent = "Monthly fees · " + (s.name || ""); $("payAll").hidden = true;
     if (!j || isNaN(j)) { $("paySub").textContent = "No joining date found. Set one in Students → Manage."; $("payRows").innerHTML = ""; return; }
-    if (!amt) { $("paySub").textContent = "No fee plan covers Class " + s.class + " with this student's subjects yet. Set it in Fees → Fee plan."; $("payRows").innerHTML = ""; return; }
-    $("paySub").textContent = inr(amt) + " per month (" + (s.subjects || []).join(", ") + "), due on the " + ord(j.getDate()) + " of each month. The first month is paid when the account is created.";
+    if (!amt) { $("paySub").textContent = "No monthly fee is set for Class " + s.class + " yet. Set it in Fees → Fee plan."; $("payRows").innerHTML = ""; return; }
+    $("paySub").textContent = inr(amt) + " per month (Class " + s.class + "), due on the " + ord(j.getDate()) + " of each month. The first month is paid when the account is created.";
     const now = new Date(), cyc = cycles(s).slice().reverse(); $("payAll").hidden = !pend(s).cyc.length;
     $("payRows").innerHTML = cyc.map((c) => { const r = paidRec(s, c), late = !r && c.due <= now;
       return `<div class="item"><div class="tx"><b>${MONN[c.due.getMonth()]} ${c.due.getFullYear()}</b><small>Due ${dFmt(c.due)}</small></div>

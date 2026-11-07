@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#e9eff9" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e1630" media="(prefers-color-scheme: dark)">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet">
+<title>My Profile</title>
+<script>if (/[?&]embed\b/.test(location.search)) document.documentElement.classList.add("embed");</script>
+<style>
+  :root {
+    --bg1:#e9eff9; --bg2:#f6f8fc; --card:#ffffff; --text:#0f1b3d; --muted:#6a7897; --line:#e1e8f4;
+    --blue:#2b5fd9; --blue-soft:rgba(43,95,217,.11); --red:#d6455d; --orange:#e69a1a;
+    --sh:0 8px 26px rgba(20,40,110,.09);
+    --b1:rgba(90,130,255,.2); --b2:rgba(120,200,230,.18); --b3:rgba(140,120,240,.14);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg1:#0e1630; --bg2:#141d3d; --card:#1a2547; --text:#eaf0ff; --muted:#9fb0d6; --line:#2a3862;
+      --blue:#7ea4ff; --blue-soft:rgba(126,164,255,.17); --red:#ff7b8f; --orange:#ffc25c;
+      --sh:0 10px 28px rgba(0,0,0,.4);
+      --b1:rgba(90,130,255,.16); --b2:rgba(80,190,220,.1); --b3:rgba(140,110,240,.14); }
+  }
+  * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+  html { scroll-behavior:smooth; -webkit-text-size-adjust:100%; }
+  body { min-height:100vh; min-height:100dvh; overflow-x:hidden; color:var(--text); font-family:"Inter","Segoe UI",system-ui,sans-serif;
+    background:linear-gradient(180deg,var(--bg1),var(--bg2)) fixed;
+    padding:max(18px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) 0 max(14px,env(safe-area-inset-left)); }
+  body::before { content:""; position:fixed; inset:-10%; z-index:-1; pointer-events:none;
+    background:radial-gradient(40% 32% at 12% 8%, var(--b1), transparent 70%), radial-gradient(36% 30% at 92% 30%, var(--b2), transparent 70%), radial-gradient(40% 34% at 20% 95%, var(--b3), transparent 70%);
+    animation:bgdrift 16s ease-in-out infinite alternate; }
+  .app { max-width:860px; margin:0 auto; padding-bottom:calc(130px + env(safe-area-inset-bottom)); }
+  a { color:inherit; text-decoration:none; }
+  a:focus-visible { outline:3px solid var(--blue); outline-offset:2px; }
+  svg.i { width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; flex:none; }
+  [hidden] { display:none !important; }
+
+  @keyframes rise { from { opacity:0; transform:translateY(24px); } }
+  @keyframes fade { from { opacity:0; } }
+  @keyframes bgdrift { to { transform:translate3d(2%,3%,0) scale(1.07); } }
+  @keyframes navin { from { opacity:0; transform:translate(-50%,44px); } }
+  @keyframes pillIn { from { opacity:0; transform:scale(.7); } }
+  @keyframes pop { from { opacity:0; transform:scale(.6); } }
+  @keyframes kidIn { from { opacity:0; transform:translateY(46px) scale(.92); } }
+  @keyframes unroll { from { opacity:.2; transform:scaleY(.04); } }
+  @keyframes sway { 0%,100% { transform:rotate(-1.1deg); } 50% { transform:rotate(1.1deg); } }
+  @keyframes rowIn { from { opacity:0; transform:translateY(14px) scale(.97); } }
+  @keyframes blink { 0%,92%,100% { transform:scaleY(1); } 96% { transform:scaleY(.1); } }
+  @keyframes tilt { 0%,100% { transform:rotate(-2.4deg); } 50% { transform:rotate(2.4deg); } }
+  @keyframes armA { 0%,100% { transform:rotate(-3deg); } 50% { transform:rotate(2.5deg); } }
+  @keyframes armB { 0%,100% { transform:rotate(3deg); } 50% { transform:rotate(-2.5deg); } }
+  @keyframes twink { 0%,100% { opacity:.25; transform:scale(.65); } 50% { opacity:1; transform:scale(1.2); } }
+  @keyframes blinkText { 50% { opacity:.4; } }
+
+  .banner { background:rgba(214,69,93,.12); color:var(--red); border:1px solid var(--red); border-radius:16px; padding:12px 16px; font-weight:700; font-size:.9rem; margin-bottom:14px; animation:rise .5s backwards; }
+  header { display:flex; align-items:center; gap:12px; margin-bottom:10px; animation:rise .6s cubic-bezier(.2,.7,.2,1) backwards; }
+  h1 { font-size:clamp(1.35rem,5.6vw,1.8rem); font-weight:800; }
+  .back { width:44px; height:44px; border-radius:50%; display:grid; place-items:center; background:var(--card); border:1px solid var(--line); box-shadow:var(--sh); color:var(--blue); transition:transform .2s cubic-bezier(.2,.8,.3,1.4); }
+  .back svg.i { transform:rotate(180deg); }
+  .back:active { transform:scale(.88); }
+  @media (hover:hover) { .back:hover { transform:translateX(-3px); } }
+
+  /* kid holding the banner */
+  .stage { max-width:440px; margin:0 auto; padding:0 10px; }
+  .kid { position:relative; z-index:2; aspect-ratio:300 / 170; margin-bottom:-2px; }
+  .kid svg { display:block; width:100%; height:auto; overflow:visible; animation:kidIn .85s cubic-bezier(.2,.8,.3,1.15) backwards; }
+  .head { transform-origin:150px 108px; animation:tilt 5s ease-in-out infinite; }
+  .armL { transform-origin:92px 132px; animation:armA 3.4s ease-in-out infinite; }
+  .armR { transform-origin:208px 132px; animation:armB 3.4s ease-in-out infinite; }
+  .eye { transform-box:fill-box; transform-origin:center; animation:blink 4.2s infinite; }
+  .spark { transform-box:fill-box; transform-origin:center; animation:twink 2.6s ease-in-out infinite; }
+
+  .board { position:relative; z-index:1; }
+  .rod { position:relative; height:18px; border-radius:99px; background:linear-gradient(180deg,#e0ac66,#a36b2d 55%,#7b4d1d); box-shadow:0 5px 12px rgba(60,30,0,.28); animation:fade .5s .15s backwards; }
+  .rod::before, .rod::after { content:""; position:absolute; top:-3px; width:24px; height:24px; border-radius:50%; background:radial-gradient(circle at 35% 35%,#f3cf94,#8d5a24); }
+  .rod::before { left:-6px; } .rod::after { right:-6px; }
+  .sway { transform-origin:50% 0; filter:drop-shadow(0 16px 18px rgba(20,40,110,.28));
+    animation:unroll 1s cubic-bezier(.2,.8,.3,1.05) .3s backwards, sway 6s 1.4s ease-in-out infinite; }
+  .cloth { margin:-2px 5% 0; padding:22px clamp(14px,4vw,24px) 58px; color:#fff;
+    background:linear-gradient(160deg,#17327f 0%,#2552c8 58%,#3f7bff 100%);
+    clip-path:polygon(0 0,100% 0,100% 100%,50% calc(100% - 30px),0 100%); }
+  .ct { text-align:center; font-size:.7rem; font-weight:800; letter-spacing:.22em; color:rgba(255,255,255,.72); }
+  .cloth h2 { text-align:center; margin-top:8px; font-size:clamp(1.5rem,6.4vw,2rem); font-weight:800; line-height:1.15; overflow-wrap:anywhere; }
+  .cloth h2.load { animation:blinkText 1s infinite; }
+  .pchips { display:flex; justify-content:center; flex-wrap:wrap; gap:8px; margin-top:12px; }
+  .pchips span { padding:6px 14px; border-radius:99px; background:rgba(255,255,255,.18); font-size:.82rem; font-weight:800; animation:pop .45s .9s backwards; }
+  .pchips span + span { animation-delay:1s; }
+  .rows { display:grid; gap:10px; margin-top:18px; }
+  .row { display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:16px; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.15); min-width:0;
+    animation:rowIn .5s cubic-bezier(.2,.7,.2,1) calc(var(--i,0) * 80ms + 800ms) backwards; transition:transform .25s cubic-bezier(.2,.8,.3,1.3), background .25s; }
+  @media (hover:hover) { .row:hover { transform:translateY(-3px); background:rgba(255,255,255,.18); } }
+  .row i { width:38px; height:38px; border-radius:12px; display:grid; place-items:center; background:rgba(255,255,255,.18); flex:none; }
+  .row div { min-width:0; }
+  .row small { display:block; font-size:.68rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:rgba(255,255,255,.72); }
+  .row b { display:block; margin-top:2px; font-size:1rem; font-weight:700; overflow-wrap:anywhere; }
+  .subj { display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
+  .subj span { padding:4px 10px; border-radius:99px; background:rgba(255,255,255,.2); font-size:.78rem; font-weight:700; }
+
+  nav { position:fixed; z-index:20; left:50%; transform:translateX(-50%); bottom:calc(10px + env(safe-area-inset-bottom)); width:min(680px,calc(100% - 20px)); display:grid; grid-template-columns:repeat(5,1fr);
+    padding:8px; border-radius:28px; background:linear-gradient(135deg,#1c2d5a,#2b4691); border:1px solid rgba(255,255,255,.14); box-shadow:0 14px 34px rgba(20,35,90,.38);
+    animation:navin .6s .3s cubic-bezier(.2,.8,.3,1) backwards; }
+  nav a { display:grid; justify-items:center; gap:3px; padding:6px 0; min-height:52px; font-size:.66rem; font-weight:600; text-align:center; line-height:1.15; color:rgba(255,255,255,.78); border-radius:20px; transition:color .2s, background .2s; }
+  nav a svg.i { transition:transform .25s cubic-bezier(.2,.8,.3,1.5); }
+  nav a:active svg.i { transform:scale(.8); }
+  @media (hover:hover) { nav a:hover { background:rgba(255,255,255,.12); color:#fff; } nav a:hover svg.i { transform:translateY(-3px); } }
+  @media (max-width:380px) { nav a { font-size:.58rem; } .row { padding:10px 12px; } }
+  @media (min-width:720px) { body { padding-top:max(28px,env(safe-area-inset-top)); } }
+  /* embedded inside the dashboard's glass popup (profile.html?embed=1) */
+  .embed body { background:transparent; }
+  .embed body::before { display:none; }
+  .embed header, .embed nav { display:none; }
+  .embed .app { padding-bottom:30px; }
+  .embed .stage { margin-top:34px; }
+  @media (prefers-reduced-motion:reduce) { * { transition:none !important; animation:none !important; } }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v8a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1z"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M8 3v4M16 3v4M3.5 10h17M9 15l2 2 4-4"/></symbol>
+  <symbol id="i-rupee" viewBox="0 0 24 24"><path d="M7 5h10M7 9h10M8 5c4 0 6 1.4 6 4s-2.4 4-6 4h-1l8 6.5"/></symbol>
+  <symbol id="i-clip" viewBox="0 0 24 24"><rect x="5" y="4.5" width="14" height="16.5" rx="3"/><path d="M9 4.5h6v2.5H9zM9 12h6M9 16h4"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M5 4h9a4 4 0 0 1 4 4v12H9a4 4 0 0 1-4-4zM5 16a4 4 0 0 1 4-4h9"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><path d="M6 3h3.5l1.8 4.6-2.3 1.5a11 11 0 0 0 5.4 5.4l1.5-2.3L21 14.5V18a2 2 0 0 1-2 2A16 16 0 0 1 4 5a2 2 0 0 1 2-2z"/></symbol>
+  <symbol id="i-cake" viewBox="0 0 24 24"><path d="M4 20h16v-6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2zM4 16c2 1.5 4 1.5 6 0s4-1.5 6 0 3 1 4 0M12 12V8M12 5.5c.9-1 .9-1.9 0-2.8-.9.9-.9 1.8 0 2.8z"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c1-4 4-6 8-6s7 2 8 6"/></symbol>
+  <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3.5" y="5.5" width="17" height="13" rx="3"/><path d="M4 7.5l8 6 8-6"/></symbol>
+  <symbol id="i-join" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M8 3v4M16 3v4M3.5 10h17M12 13v5M9.5 15.5h5"/></symbol>
+</svg>
+
+<div class="app">
+  <div class="banner" id="banner" role="alert" hidden></div>
+  <header>
+    <a class="back" href="dashboard.html" aria-label="Back to dashboard"><svg class="i"><use href="#i-chev"/></svg></a>
+    <h1>My Profile</h1>
+  </header>
+
+  <main>
+    <div class="stage">
+      <div class="kid" id="kid" aria-hidden="true"></div>
+      <div class="board">
+        <div class="rod"></div>
+        <div class="sway">
+          <div class="cloth">
+            <div class="ct">STUDENT PROFILE</div>
+            <h2 id="pName" class="load">…</h2>
+            <div class="pchips"><span id="pClass">Class —</span><span id="pGender" hidden></span></div>
+            <div class="rows">
+              <div class="row" style="--i:0"><i><svg class="i"><use href="#i-phone"/></svg></i><div><small>Contact number</small><b id="pMobile">—</b></div></div>
+              <div class="row" style="--i:1"><i><svg class="i"><use href="#i-cake"/></svg></i><div><small>Date of birth</small><b id="pDob">—</b></div></div>
+              <div class="row" style="--i:2"><i><svg class="i"><use href="#i-user"/></svg></i><div><small>Parent's name</small><b id="pParent">—</b></div></div>
+              <div class="row" style="--i:3"><i><svg class="i"><use href="#i-join"/></svg></i><div><small>Joined on</small><b id="pJoin">—</b></div></div>
+              <div class="row wide" style="--i:4"><i><svg class="i"><use href="#i-mail"/></svg></i><div><small>Gmail</small><b id="pMail">—</b></div></div>
+              <div class="row wide" style="--i:5"><i><svg class="i"><use href="#i-book"/></svg></i><div><small>Subjects</small><div class="subj" id="pSubj"><b>—</b></div></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<nav aria-label="Main navigation">
+  <a href="dashboard.html"><svg class="i"><use href="#i-home"/></svg>Home</a>
+  <a href="attendance.html"><svg class="i"><use href="#i-cal"/></svg>Attendance</a>
+  <a href="fees.html"><svg class="i"><use href="#i-rupee"/></svg>Fees</a>
+  <a href="study-materials.html"><svg class="i"><use href="#i-book"/></svg>Study Materials</a>
+  <a href="tests.html"><svg class="i"><use href="#i-clip"/></svg>Tests</a>
+</nav>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDbxUTsBSeFIevnbJadEHkubyKBRHdDM94",
+    authDomain: "geniusinstitute-unnao.firebaseapp.com",
+    projectId: "geniusinstitute-unnao",
+    storageBucket: "geniusinstitute-unnao.firebasestorage.app",
+    messagingSenderId: "457602291145",
+    appId: "1:457602291145:web:678518a46dd475dd540418",
+    measurementId: "G-10RZJQMHR7"
+  };
+  const LOGIN_PAGE = "login.html";
+
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+  const banner = (m) => { $("banner").textContent = m; $("banner").hidden = false; };
+
+  /* ---------- the kid (boy or girl from the student's gender) ---------- */
+  const SP = '<path class="spark" d="M0 -7L2 -2L7 0L2 2L0 7L-2 2L-7 0L-2 -2Z" fill="#ffd166"/>';
+  const EYES = `<ellipse class="eye" cx="84" cy="92" rx="4.2" ry="5.4" fill="#2b1a14"/><ellipse class="eye" cx="116" cy="92" rx="4.2" ry="5.4" fill="#2b1a14"/>
+    <path d="M77 82Q84 78 91 82M109 82Q116 78 123 82" stroke="#3a2418" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+    <path d="M90 105Q100 117 110 105Z" fill="#9a3f3f" stroke="#9a3f3f" stroke-width="2.5" stroke-linejoin="round"/>`;
+  function kidArt(boy) {
+    const skin = boy ? "#efc29d" : "#f8d0b0", neck = boy ? "#dca67f" : "#eab08c", shirt = boy ? "#3fb68b" : "#ff9f6b", sleeve = boy ? "#2fa077" : "#f08a52";
+    const back = boy ? "" : '<path d="M58 92C50 44 84 30 100 30C116 30 150 44 142 92C148 128 140 150 130 160L122 124L78 124L70 160C60 150 52 128 58 92Z" fill="#4a2c20"/>';
+    const top = boy
+      ? '<path d="M60 88C56 52 80 36 102 38C126 40 142 58 140 88C134 72 122 62 104 60C86 60 70 70 60 88Z" fill="#2a1d17"/><path d="M94 42Q104 26 120 36Q108 38 102 48Z" fill="#2a1d17"/>'
+      : '<path d="M61 86C60 56 80 44 100 44C122 44 140 56 139 86C128 74 116 66 100 62C86 66 72 76 61 86Z" fill="#4a2c20"/><circle cx="124" cy="54" r="6" fill="#ffd166"/><circle cx="124" cy="54" r="2.4" fill="#ff9f43"/>';
+    const blush = boy ? "rgba(230,110,90,.22)" : "rgba(255,120,130,.32)";
+    const arm = (cls, x1, x2) => `<g class="${cls}"><line x1="${x1}" y1="132" x2="${x2}" y2="162" stroke="${sleeve}" stroke-width="22" stroke-linecap="round"/><circle cx="${x2 - 4 * Math.sign(x2 - x1)}" cy="166" r="12" fill="${skin}"/><ellipse cx="${x2 - 4 * Math.sign(x2 - x1)}" cy="157" rx="5" ry="3.4" fill="${skin}"/></g>`;
+    return `<svg viewBox="0 0 300 170" xmlns="http://www.w3.org/2000/svg">
+      <g transform="translate(28 40)">${SP}</g><g transform="translate(274 34)" style="animation-delay:.8s">${SP}</g><g transform="translate(250 96)">${SP.replace('class="spark"', 'class="spark" style="animation-delay:1.4s"')}</g>
+      <g transform="translate(50 -22)">${back}</g>
+      <rect x="138" y="92" width="24" height="28" rx="9" fill="${neck}"/>
+      <path d="M70 170C70 128 105 112 150 112C195 112 230 128 230 170Z" fill="${shirt}"/>
+      <path d="M132 114L150 134L168 114" fill="#fff" fill-opacity=".92"/>
+      ${arm("armL", 92, 46)}${arm("armR", 208, 254)}
+      <g class="head"><g transform="translate(50 -22)">
+        <circle cx="62" cy="94" r="7" fill="${skin}"/><circle cx="138" cy="94" r="7" fill="${skin}"/><circle cx="100" cy="90" r="38" fill="${skin}"/>
+        ${top}${EYES}
+        <circle cx="75" cy="104" r="5.5" fill="${blush}"/><circle cx="125" cy="104" r="5.5" fill="${blush}"/>
+      </g></g></svg>`;
+  }
+
+  /* ---------- fill the banner ---------- */
+  const toDate = (v) => {
+    if (!v) return null;
+    if (v.toDate) return v.toDate();
+    if (typeof v === "string" && /^\d{4}-\d{2}-\d{2}/.test(v)) { const [y, m, d] = v.slice(0, 10).split("-").map(Number); return new Date(y, m - 1, d); }
+    const d = new Date(v); return isNaN(d) ? null : d;
+  };
+  const fmt = (d) => d ? d.toLocaleDateString("en-IN", { day:"numeric", month:"long", year:"numeric" }) : "—";
+  function show(d) {
+    const name = String(d.name || d.studentName || "").trim() || "Student";
+    const g = String(d.gender || d.sex || "").trim().toLowerCase(), boy = /^(m|male|boy|man)$/.test(g), girl = /^(f|female|girl|woman)$/.test(g);
+    $("kid").innerHTML = kidArt(boy);
+    $("pName").textContent = name; $("pName").classList.remove("load");
+    const cls = String(d.class ?? d.className ?? "").trim();
+    $("pClass").textContent = cls ? (/^\d+$/.test(cls) ? "Class " + cls : cls) : "Class —";
+    $("pGender").hidden = !(boy || girl); $("pGender").textContent = boy ? "Male" : "Female";
+    const m = String(d.mobile ?? d.phone ?? "").replace(/\D/g, "");
+    $("pMobile").textContent = m.length === 10 ? "+91 " + m.slice(0, 5) + " " + m.slice(5) : m || "—";
+    const dob = toDate(d.dob ?? d.dateOfBirth);
+    let age = ""; if (dob) { const n = new Date(); let a = n.getFullYear() - dob.getFullYear(); if (n < new Date(n.getFullYear(), dob.getMonth(), dob.getDate())) a--; age = a >= 0 ? " · " + a + " yrs" : ""; }
+    $("pDob").textContent = dob ? fmt(dob) + age : "—";
+    $("pParent").textContent = d.parentName || d.parent || "—";
+    $("pJoin").textContent = fmt(toDate(d.createdAt ?? d.joinDate ?? d.joiningDate));
+    $("pMail").textContent = d.gmail || d.email || "—";
+    const subs = Array.isArray(d.subjects) ? d.subjects : d.subjects ? String(d.subjects).split(",") : [];
+    $("pSubj").innerHTML = subs.length ? subs.map((s) => "<span>" + esc(String(s).trim()) + "</span>").join("") : "<b>—</b>";
+  }
+
+  /* ---------- Firebase ---------- */
+  if (location.protocol === "file:") banner("This page was opened as a file. Firebase needs a web server: use VS Code Live Server, 'npx serve', or upload to hosting.");
+  const app = initializeApp(firebaseConfig), auth = getAuth(app), db = getFirestore(app);
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { location.replace(LOGIN_PAGE); return; }
+    try {
+      const snap = await getDoc(doc(db, "students", user.uid));
+      if (snap.exists() && snap.data().blocked) { location.replace(LOGIN_PAGE + "#blocked"); return; }
+      if (snap.exists()) show(snap.data());
+      else { show({}); banner("No student record exists for this account in Firestore (students/" + user.uid + ")."); }
+    } catch (e) {
+      show({});
+      banner("Could not read your details from Firebase (" + (e.code || e.message) + "). Check your Firestore rules.");
+    }
+  });
+</script>
+</body>
+</html>

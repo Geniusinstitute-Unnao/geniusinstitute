@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Attendance</title>
+<style>
+  :root { --bg1:#eceffd; --bg2:#f8f6ff; --card:#fff; --text:#14183c; --muted:#6b7090; --line:#e8eaf6;
+    --blue:#1f5bff; --blue-soft:rgba(31,91,255,.12); --green:#1fa971; --red:#e5484d; --orange:#f59e0b; --purple:#7c4dff; --teal:#14b8a6;
+    --sh:0 8px 26px rgba(60,70,160,.09); --glass:rgba(255,255,255,.62); --glass-b:rgba(255,255,255,.85); }
+  @media (prefers-color-scheme: dark) { :root { --bg1:#12142b; --bg2:#181a38; --card:#1c1f3d; --text:#eef0ff; --muted:#9aa0d0; --line:#2c3060;
+    --blue:#7b99ff; --blue-soft:rgba(123,153,255,.16); --green:#4fd69c; --red:#ff7b80; --orange:#ffbd4a; --purple:#a98bff; --teal:#4fd6c7;
+    --sh:0 8px 26px rgba(0,0,0,.35); --glass:rgba(28,31,61,.6); --glass-b:rgba(150,160,255,.25); } }
+  * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+  html { -webkit-text-size-adjust:100%; }
+  body { min-height:100dvh; overflow-x:hidden; color:var(--text); font-family:"Inter","Segoe UI",system-ui,sans-serif; background:linear-gradient(180deg,var(--bg1),var(--bg2)) fixed;
+    padding:max(18px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) 0 max(14px,env(safe-area-inset-left)); }
+  .app { max-width:860px; margin:0 auto; padding-bottom:calc(120px + env(safe-area-inset-bottom)); }
+  button, select { font:inherit; color:inherit; cursor:pointer; border:0; background:none; }
+  a { color:inherit; text-decoration:none; }
+  a:focus-visible, button:focus-visible, select:focus-visible { outline:3px solid var(--blue); outline-offset:2px; }
+  svg.i { width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; flex:none; }
+  [hidden] { display:none !important; }
+  @keyframes rise { from { opacity:0; transform:translateY(24px); } }
+  @keyframes pop { from { opacity:0; transform:scale(.6); } }
+  @keyframes navin { from { opacity:0; transform:translate(-50%,44px); } }
+  @keyframes pulse { 0% { box-shadow:0 0 0 0 rgba(31,169,113,.5); } 80%,100% { box-shadow:0 0 0 8px rgba(31,169,113,0); } }
+  @keyframes flicker { 0%,100% { transform:scale(1) rotate(0); } 30% { transform:scale(1.12) rotate(-5deg); } 60% { transform:scale(.96) rotate(4deg); } }
+  @keyframes ringp { 0% { opacity:.9; transform:scale(1); } 100% { opacity:0; transform:scale(1.22); } }
+
+  .banner { background:rgba(229,72,77,.12); color:var(--red); border:1px solid var(--red); border-radius:16px; padding:12px 16px; font-weight:700; font-size:.9rem; margin-bottom:14px; }
+  header { display:flex; align-items:center; gap:12px; margin-bottom:18px; animation:rise .6s cubic-bezier(.2,.7,.2,1) backwards; }
+  header .hd { flex:1; min-width:0; }
+  h1 { font-size:clamp(1.35rem,5.6vw,1.95rem); font-weight:800; line-height:1.2; }
+  header p { color:var(--muted); margin-top:4px; font-size:.92rem; }
+  .live { display:inline-flex; align-items:center; gap:7px; padding:8px 12px; border-radius:99px; background:var(--card); box-shadow:var(--sh); font-size:.76rem; font-weight:800; color:var(--muted); }
+  .live i { width:9px; height:9px; border-radius:50%; background:var(--muted); }
+  .live.on i { background:var(--green); animation:pulse 1.8s infinite; }
+
+  .card { background:var(--card); border-radius:24px; box-shadow:var(--sh); padding:clamp(14px,3.5vw,22px); margin-bottom:clamp(12px,2.5vw,18px); animation:rise .65s cubic-bezier(.2,.7,.2,1) calc(var(--n,0) * 90ms) backwards; }
+  .head { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+  .head h2 { font-size:1.08rem; font-weight:800; }
+  .tile { width:44px; height:44px; border-radius:14px; display:grid; place-items:center; flex:none; }
+  .t-blue { background:var(--blue-soft); color:var(--blue); } .t-green { background:rgba(31,169,113,.15); color:var(--green); }
+  .t-orange { background:rgba(245,158,11,.16); color:var(--orange); } .t-purple { background:rgba(124,77,255,.15); color:var(--purple); }
+  .t-red { background:rgba(229,72,77,.14); color:var(--red); } .t-teal { background:rgba(20,184,166,.15); color:var(--teal); }
+  .sel { margin-left:auto; max-width:48%; padding:10px 12px; border-radius:12px; border:1px solid var(--line); background:var(--card); color:var(--text); font-size:.9rem; transition:border-color .2s, box-shadow .2s; }
+  .sel:focus { border-color:var(--blue); box-shadow:0 0 0 4px var(--blue-soft); }
+
+  /* petrol pump meter */
+  @keyframes blink { 50% { opacity:.25; } }
+  .gwrap { max-width:420px; margin:0 auto; text-align:center; }
+  .pump { padding:14px; border-radius:22px; text-align:left; color:#fff; background:linear-gradient(160deg,#2b2f4f,#14162c); box-shadow:inset 0 0 0 3px #3a3f6b, 0 10px 24px rgba(20,24,60,.3); }
+  .ptop { display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:10px; font-size:.68rem; font-weight:800; letter-spacing:.12em; color:#aab0e0; }
+  .ptop i { display:inline-block; width:9px; height:9px; margin-right:7px; border-radius:50%; background:#ffbd4a; animation:blink 1s infinite; }
+  #gCap { text-transform:uppercase; text-align:right; }
+  .lcd { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; padding:10px 14px; border-radius:12px; background:#0b1a12; box-shadow:inset 0 2px 8px rgba(0,0,0,.7); }
+  .lcd small { font-size:.64rem; font-weight:800; letter-spacing:.1em; line-height:1.4; color:#5fe3a1; opacity:.85; }
+  .odo { display:flex; align-items:flex-end; font:800 1.7rem/1 "Courier New",ui-monospace,monospace; color:#5fffb0; text-shadow:0 0 10px rgba(95,255,176,.55); }
+  .lcd.big .odo { font-size:clamp(2.6rem,13vw,3.8rem); }
+  .dg { height:1em; width:.64em; overflow:hidden; }
+  .dw { transition:transform 1.9s cubic-bezier(.15,.7,.2,1) var(--dl,0s); }
+  .dw span { display:block; height:1em; text-align:center; }
+  .odo .u { font-size:.5em; margin-left:.2em; line-height:1.4; }
+  .tank { display:flex; align-items:center; gap:8px; font-size:.72rem; font-weight:800; color:#aab0e0; }
+  .tbar { flex:1; height:14px; border-radius:99px; overflow:hidden; background:#0b1a12; box-shadow:inset 0 2px 6px rgba(0,0,0,.7); }
+  .tfill { height:100%; width:0; background:repeating-linear-gradient(90deg,var(--c,#5fffb0) 0 8px,transparent 8px 10px); transition:width 1.9s cubic-bezier(.15,.7,.2,1); }
+  .chipst { display:inline-block; margin-top:12px; padding:7px 14px; border-radius:99px; font-weight:800; font-size:.82rem; background:var(--blue-soft); color:var(--blue); }
+  .chipst.ok { background:rgba(31,169,113,.15); color:var(--green); } .chipst.bad { background:rgba(229,72,77,.14); color:var(--red); } .chipst.mid { background:rgba(245,158,11,.16); color:var(--orange); }
+
+  /* pie */
+  .pie { display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:clamp(14px,4vw,28px); }
+  .pie svg { width:clamp(150px,44vw,210px); flex:none; transform:rotate(-90deg); }
+  .pie .tr { stroke:var(--line); }
+  .pleg { flex:1 1 180px; min-width:0; display:grid; gap:10px; }
+  .pl { display:grid; grid-template-columns:12px 1fr auto 3.6ch; align-items:center; gap:8px; font-size:.9rem; font-weight:700; }
+  .pl i { width:12px; height:12px; border-radius:4px; }
+  .pl b { font-size:1.1rem; text-align:right; font-variant-numeric:tabular-nums; }
+  .pl em { font-style:normal; color:var(--muted); font-size:.8rem; text-align:right; font-variant-numeric:tabular-nums; }
+  .abs { margin-top:16px; padding:14px; border-radius:16px; background:rgba(229,72,77,.1); }
+  .abs .at { display:flex; align-items:baseline; flex-wrap:wrap; gap:4px 10px; font-weight:800; color:var(--red); }
+  .abs .at b { font-size:2rem; line-height:1; font-variant-numeric:tabular-nums; } .abs .at small { color:var(--muted); font-weight:700; font-size:.82rem; }
+  .chips { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+  .chips span { padding:5px 10px; border-radius:99px; background:rgba(229,72,77,.14); color:var(--red); font-size:.76rem; font-weight:800; animation:pop .4s backwards; }
+
+  /* stat tiles */
+  .stats { display:grid; grid-template-columns:repeat(2,1fr); gap:clamp(8px,2vw,14px); margin-bottom:clamp(12px,2.5vw,18px); }
+  @media (min-width:600px) { .stats { grid-template-columns:repeat(3,1fr); } }
+  .stats .card { margin:0; padding:clamp(12px,3vw,18px); display:flex; flex-direction:column; gap:4px; min-width:0; animation-name:pop; animation-timing-function:cubic-bezier(.2,.8,.3,1.15); transition:transform .25s cubic-bezier(.2,.8,.3,1.2); }
+  @media (hover:hover) { .stats .card:hover { transform:translateY(-4px); } }
+  .stats .tile { width:38px; height:38px; margin-bottom:4px; }
+  .stats .tile svg.i { width:20px; height:20px; }
+  .val { font-size:clamp(1.5rem,6vw,2rem); font-weight:800; } .sub { color:var(--muted); font-size:.82rem; font-weight:600; }
+  .fl svg.i { fill:currentColor; fill-opacity:.2; transform-origin:50% 90%; animation:flicker 1.8s ease-in-out infinite; }
+
+  /* target */
+  .tmsg { font-size:.95rem; line-height:1.5; margin-bottom:16px; } .tmsg b { color:var(--blue); }
+  .pbar { position:relative; height:14px; border-radius:99px; background:var(--line); }
+  .pfill { height:100%; width:0; border-radius:99px; background:var(--blue); transition:width 1.3s cubic-bezier(.2,.7,.2,1), background .4s; }
+  .pmark { position:absolute; top:-5px; bottom:-5px; width:3px; border-radius:2px; background:var(--text); left:75%; }
+  .plab { position:relative; height:18px; margin-top:8px; font-size:.72rem; font-weight:700; color:var(--muted); }
+  .plab span { position:absolute; transform:translateX(-50%); } .plab span:first-child { left:0; transform:none; } .plab span:last-child { right:0; left:auto; transform:none; }
+
+  /* trend bars */
+  .bars { display:grid; grid-template-columns:repeat(6,1fr); gap:clamp(6px,2vw,14px); height:170px; align-items:end; }
+  .bcol { height:100%; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; gap:6px; min-width:0; }
+  .bcol small { font-size:.72rem; font-weight:700; color:var(--muted); } .bcol em { font-style:normal; font-size:.76rem; font-weight:800; }
+  .bar { width:100%; max-width:46px; height:0; border-radius:10px 10px 4px 4px; background:linear-gradient(180deg,var(--blue),var(--purple)); opacity:.55; transition:height 1s cubic-bezier(.2,.8,.3,1.1) calc(var(--i) * 90ms); }
+  .bcol.cur .bar { opacity:1; }
+
+  /* subjects */
+  .srow { margin-bottom:14px; } .srow:last-child { margin-bottom:0; }
+  .srow .l { display:flex; justify-content:space-between; gap:10px; font-weight:700; font-size:.92rem; margin-bottom:6px; } .srow .l span { color:var(--muted); font-weight:600; font-size:.84rem; }
+  .srow .pbar { height:10px; }
+
+  /* calendar */
+  .calnav { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  .calnav b { font-size:1.02rem; font-weight:800; }
+  .cnb { width:40px; height:40px; border-radius:50%; display:grid; place-items:center; background:var(--blue-soft); color:var(--blue); transition:transform .2s cubic-bezier(.2,.8,.3,1.4); }
+  .cnb.prev svg.i { transform:rotate(180deg); } .cnb:active { transform:scale(.86); }
+  .calwk, .calgrid { display:grid; grid-template-columns:repeat(7,1fr); gap:clamp(3px,1.2vw,6px); }
+  .calwk span { text-align:center; font-size:.72rem; font-weight:800; color:var(--muted); padding:4px 0; }
+  .calgrid { touch-action:pan-y; }
+  .cd { position:relative; aspect-ratio:1; min-height:34px; border-radius:12px; display:grid; place-items:center; font-weight:700; font-size:.9rem; color:var(--text); cursor:default;
+    transition:transform .22s cubic-bezier(.2,.8,.3,1.4), background .25s; animation:pop .45s cubic-bezier(.2,.8,.3,1.2) calc(var(--i,0) * 14ms) backwards; }
+  .cd.e { visibility:hidden; animation:none; }
+  .cd.p { background:rgba(31,169,113,.15); color:var(--green); } .cd.a { background:rgba(229,72,77,.14); color:var(--red); }
+  .cd.l { background:rgba(245,158,11,.16); color:var(--orange); } .cd.v { background:rgba(124,77,255,.15); color:var(--purple); } .cd.h { background:rgba(124,130,180,.1); color:var(--muted); }
+  .cd.td::before { content:""; position:absolute; inset:-3px; border-radius:15px; border:2px solid var(--blue); animation:ringp 2.2s ease-out infinite; }
+  .cd.sel { background:var(--blue); color:var(--card); transform:scale(1.1); z-index:1; }
+  .cd:not(.e):active { transform:scale(.9); }
+  .calinfo { margin-top:14px; padding:12px 14px; border-radius:16px; background:var(--blue-soft); font-size:.9rem; min-height:50px; display:flex; flex-direction:column; justify-content:center; gap:3px; }
+  .calinfo small { color:var(--muted); font-size:.84rem; }
+  .legend { display:flex; flex-wrap:wrap; gap:6px 14px; margin-top:12px; color:var(--muted); font-size:.76rem; font-weight:700; }
+  .legend span { display:inline-flex; align-items:center; gap:6px; } .legend i { width:10px; height:10px; border-radius:4px; }
+
+  /* log */
+  .nrow { display:flex; align-items:center; gap:12px; padding:12px 0; border-top:1px solid var(--line); animation:rise .5s cubic-bezier(.2,.7,.2,1) var(--d,0s) backwards; }
+  .nrow:first-child { border-top:0; } .nrow .tx { flex:1; min-width:0; } .nrow strong { display:block; font-size:.96rem; } .nrow small { color:var(--muted); font-size:.84rem; }
+  .pill { padding:6px 12px; border-radius:99px; font-size:.78rem; font-weight:800; flex:none; }
+  .pill.p { background:rgba(31,169,113,.15); color:var(--green); } .pill.a { background:rgba(229,72,77,.14); color:var(--red); }
+  .pill.l { background:rgba(245,158,11,.16); color:var(--orange); } .pill.v { background:rgba(124,77,255,.15); color:var(--purple); }
+  .empty { text-align:center; padding:6px 4px; } .empty p { color:var(--muted); font-size:.9rem; line-height:1.5; margin-top:6px; }
+  .empty code { display:block; margin-top:12px; padding:12px; border-radius:12px; background:var(--blue-soft); font-size:.8rem; text-align:left; overflow-x:auto; white-space:pre; }
+
+  nav { position:fixed; z-index:20; left:50%; transform:translateX(-50%); bottom:calc(10px + env(safe-area-inset-bottom)); width:min(680px,calc(100% - 20px)); display:grid; grid-template-columns:repeat(5,1fr); padding:8px 6px; border-radius:26px;
+    background:var(--glass); border:1px solid var(--glass-b); -webkit-backdrop-filter:blur(20px) saturate(170%); backdrop-filter:blur(20px) saturate(170%); box-shadow:0 10px 30px rgba(40,50,140,.18); animation:navin .6s .3s cubic-bezier(.2,.8,.3,1) backwards; }
+  nav a { display:grid; justify-items:center; gap:3px; padding:6px 0; min-height:52px; font-size:.66rem; font-weight:600; text-align:center; line-height:1.15; color:var(--muted); border-radius:18px; transition:color .2s; }
+  nav a.on { color:var(--blue); font-weight:800; } nav a.on svg.i { fill:currentColor; fill-opacity:.18; animation:pop .6s .5s backwards; }
+  nav a svg.i { transition:transform .25s cubic-bezier(.2,.8,.3,1.5); } nav a:active svg.i { transform:scale(.8); }
+  @media (hover:hover) { nav a:hover svg.i { transform:translateY(-3px); } }
+  @media (max-width:380px) { nav a { font-size:.58rem; } .sel { max-width:56%; padding:8px 10px; font-size:.84rem; } .head { flex-wrap:wrap; } .cd { font-size:.84rem; border-radius:10px; } }
+  @media (min-width:720px) { body { padding-top:max(28px,env(safe-area-inset-top)); } .cd { max-height:62px; } }
+  @media (prefers-reduced-motion:reduce) { * { transition:none !important; animation:none !important; } }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v8a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1z"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M8 3v4M16 3v4M3.5 10h17M9 15l2 2 4-4"/></symbol>
+  <symbol id="i-rupee" viewBox="0 0 24 24"><path d="M7 5h10M7 9h10M8 5c4 0 6 1.4 6 4s-2.4 4-6 4h-1l8 6.5"/></symbol>
+  <symbol id="i-clip" viewBox="0 0 24 24"><rect x="5" y="4.5" width="14" height="16.5" rx="3"/><path d="M9 4.5h6v2.5H9zM9 12h6M9 16h4"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M5 4h9a4 4 0 0 1 4 4v12H9a4 4 0 0 1-4-4zM5 16a4 4 0 0 1 4-4h9"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+  <symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 3c1 3.5 5 5.5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 .3 1.2 1 1.8 1.8 2C10.5 8.5 11 5.5 12 3z"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M8 12.5l3 3 5-6"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M9 9l6 6M15 9l-6 6"/></symbol>
+  <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H4v1a3 3 0 0 0 4 3M16 6h4v1a3 3 0 0 1-4 3M12 13v4M8 20h8"/></symbol>
+</svg>
+
+<div class="app">
+  <div class="banner" id="banner" role="alert" hidden></div>
+  <header>
+    <div class="hd"><h1>Attendance</h1><p id="sub">Loading your records…</p></div>
+    <span class="live" id="live"><i></i>Live</span>
+  </header>
+
+  <main>
+    <div class="card" style="--n:1">
+      <div class="head"><div class="tile t-blue"><svg class="i"><use href="#i-cal"/></svg></div><h2>Attendance Meter</h2>
+        <select class="sel" id="per" aria-label="Period"></select></div>
+      <div class="gwrap">
+        <div class="pump" role="group" aria-label="Attendance meter">
+          <div class="ptop"><span><i></i>ATTENDANCE PUMP</span><span id="gCap">Overall</span></div>
+          <div class="lcd big"><small>ATTENDANCE<br>PERCENT</small><div class="odo" id="oPct" role="img"></div></div>
+          <div class="lcd"><small>CLASSES<br>ATTENDED</small><div class="odo" id="oAtt" role="img"></div></div>
+          <div class="lcd"><small>TOTAL<br>CLASSES</small><div class="odo" id="oTot" role="img"></div></div>
+          <div class="tank"><span>E</span><div class="tbar"><div class="tfill" id="pFill"></div></div><span>F</span></div>
+        </div>
+        <span class="chipst" id="gChip">–</span>
+      </div>
+    </div>
+
+    <div class="card" style="--n:2">
+      <div class="head"><div class="tile t-purple"><svg class="i"><use href="#i-cal"/></svg></div><h2>Attendance Pie Chart</h2></div>
+      <div class="pie">
+        <svg viewBox="0 0 100 100" role="img" aria-label="Attendance pie chart">
+          <circle class="tr" cx="50" cy="50" r="25" fill="none" stroke-width="50"/>
+          <circle id="pp" cx="50" cy="50" r="25" fill="none" stroke="var(--green)" stroke-width="50" pathLength="100" stroke-dasharray="0 100"/>
+          <circle id="pl" cx="50" cy="50" r="25" fill="none" stroke="var(--orange)" stroke-width="50" pathLength="100" stroke-dasharray="0 100"/>
+          <circle id="pa" cx="50" cy="50" r="25" fill="none" stroke="var(--red)" stroke-width="50" pathLength="100" stroke-dasharray="0 100"/>
+          <circle id="pv" cx="50" cy="50" r="25" fill="none" stroke="var(--purple)" stroke-width="50" pathLength="100" stroke-dasharray="0 100"/>
+        </svg>
+        <div class="pleg">
+          <div class="pl"><i style="background:var(--green)"></i>Present<b id="lP">0</b><em id="lPp">0%</em></div>
+          <div class="pl"><i style="background:var(--orange)"></i>Late<b id="lL">0</b><em id="lLp">0%</em></div>
+          <div class="pl"><i style="background:var(--red)"></i>Absent<b id="lA">0</b><em id="lAp">0%</em></div>
+          <div class="pl"><i style="background:var(--purple)"></i>On leave<b id="lV">0</b><em id="lVp">0%</em></div>
+        </div>
+      </div>
+      <div class="abs"><div class="at"><span>Absences</span><b id="aN">0</b><small id="aP">0% of classes</small></div><div class="chips" id="aList"></div></div>
+    </div>
+
+    <div class="stats">
+      <div class="card" style="--n:2"><div class="tile t-green"><svg class="i"><use href="#i-check"/></svg></div><div class="val" id="sP">0</div><div class="sub">Present</div></div>
+      <div class="card" style="--n:3"><div class="tile t-red"><svg class="i"><use href="#i-x"/></svg></div><div class="val" id="sA">0</div><div class="sub">Absent</div></div>
+      <div class="card" style="--n:4"><div class="tile t-orange"><svg class="i"><use href="#i-clock"/></svg></div><div class="val" id="sL">0</div><div class="sub">Late</div></div>
+      <div class="card" style="--n:5"><div class="tile t-purple"><svg class="i"><use href="#i-cal"/></svg></div><div class="val" id="sV">0</div><div class="sub">On leave</div></div>
+      <div class="card fl" style="--n:6"><div class="tile t-orange"><svg class="i"><use href="#i-flame"/></svg></div><div class="val" id="sS">0</div><div class="sub">Current streak</div></div>
+      <div class="card" style="--n:7"><div class="tile t-teal"><svg class="i"><use href="#i-trophy"/></svg></div><div class="val" id="sB">0</div><div class="sub">Best streak</div></div>
+    </div>
+
+    <div class="card" style="--n:8">
+      <div class="head"><div class="tile t-green"><svg class="i"><use href="#i-check"/></svg></div><h2>75% Target</h2></div>
+      <p class="tmsg" id="tMsg"></p>
+      <div class="pbar"><div class="pfill" id="tFill"></div><div class="pmark"></div></div>
+      <div class="plab"><span>0%</span><span style="left:75%">75%</span><span>100%</span></div>
+    </div>
+
+    <div class="card" style="--n:9">
+      <div class="head"><div class="tile t-purple"><svg class="i"><use href="#i-cal"/></svg></div><h2>Last 6 Months</h2></div>
+      <div class="bars" id="bars"></div>
+    </div>
+
+    <div class="card" id="subjCard" style="--n:10" hidden>
+      <div class="head"><div class="tile t-teal"><svg class="i"><use href="#i-book"/></svg></div><h2>Subject-wise</h2></div>
+      <div id="subj"></div>
+    </div>
+
+    <div class="card" style="--n:11">
+      <div class="head"><div class="tile t-teal"><svg class="i"><use href="#i-cal"/></svg></div><h2>Calendar</h2></div>
+      <div class="calnav">
+        <button class="cnb prev" id="cPrev" type="button" aria-label="Previous month"><svg class="i"><use href="#i-chev"/></svg></button>
+        <b id="cTitle" aria-live="polite"></b>
+        <button class="cnb" id="cNext" type="button" aria-label="Next month"><svg class="i"><use href="#i-chev"/></svg></button>
+      </div>
+      <div class="calwk" aria-hidden="true"><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span></div>
+      <div class="calgrid" id="cGrid"></div>
+      <div class="calinfo" id="cInfo" aria-live="polite"><small>Tap a date to see details</small></div>
+      <div class="legend"><span><i style="background:var(--green)"></i>Present</span><span><i style="background:var(--red)"></i>Absent</span><span><i style="background:var(--orange)"></i>Late</span><span><i style="background:var(--purple)"></i>Leave</span><span><i style="background:var(--muted)"></i>Sunday</span></div>
+    </div>
+
+    <div class="card" style="--n:12">
+      <div class="head"><div class="tile t-blue"><svg class="i"><use href="#i-clock"/></svg></div><h2>Recent Records</h2></div>
+      <div id="log"></div>
+    </div>
+  </main>
+</div>
+
+<nav aria-label="Main navigation">
+  <a href="dashboard.html"><svg class="i"><use href="#i-home"/></svg>Home</a>
+  <a href="attendance.html" class="on" aria-current="page"><svg class="i"><use href="#i-cal"/></svg>Attendance</a>
+  <a href="fees.html"><svg class="i"><use href="#i-rupee"/></svg>Fees</a>
+  <a href="study-materials.html"><svg class="i"><use href="#i-book"/></svg>Study Materials</a>
+  <a href="tests.html"><svg class="i"><use href="#i-clip"/></svg>Tests</a>
+</nav>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, doc, getDoc, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDbxUTsBSeFIevnbJadEHkubyKBRHdDM94",
+    authDomain: "geniusinstitute-unnao.firebaseapp.com",
+    projectId: "geniusinstitute-unnao",
+    storageBucket: "geniusinstitute-unnao.firebasestorage.app",
+    messagingSenderId: "457602291145",
+    appId: "1:457602291145:web:678518a46dd475dd540418",
+    measurementId: "G-10RZJQMHR7"
+  };
+  const LOGIN_PAGE = "login.html", TARGET = 75;
+  /* Teacher portal layout: attendance/{studentUid}_{YYYY-MM} -> { uid, month:"YYYY-MM", days:{ "4":"P"|"A" } } */
+
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+  const p2 = (n) => String(n).padStart(2, "0");
+  const MON = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const LBL = { p:"Present", a:"Absent", l:"Late", v:"On leave", h:"Sunday (holiday)" };
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const today = new Date(), mk = (y, m) => y + "-" + p2(m + 1);
+  const todayK = mk(today.getFullYear(), today.getMonth()) + "-" + p2(today.getDate());
+  let recs = [], byK = {}, per = "all", cy = today.getFullYear(), cm = today.getMonth(), cSel = todayK, gv = 0, uid = "";
+
+  function countTo(el, to, fmt = (n) => n, dur = 1100) {
+    const from = +el.dataset.v || 0; el.dataset.v = to; cancelAnimationFrame(el._r);
+    if (reduce || from === to) { el.textContent = fmt(to); return; }
+    const t0 = performance.now(), step = (t) => { const k = Math.min((t - t0) / dur, 1), e = 1 - Math.pow(1 - k, 3);
+      el.textContent = fmt(Math.round(from + (to - from) * e)); if (k < 1) el._r = requestAnimationFrame(step); };
+    el._r = requestAnimationFrame(step);
+  }
+
+  /* ---------- petrol pump meter (rolling digits) ---------- */
+  function buildOdo(el, n, unit) {
+    let h = ""; for (let i = 0; i < n; i++) h += '<div class="dg"><div class="dw">' + Array.from({ length:20 }, (_, k) => "<span>" + (k % 10) + "</span>").join("") + "</div></div>";
+    el.innerHTML = h + (unit ? '<span class="u">' + unit + "</span>" : "");
+  }
+  function setOdo(el, val, n) {
+    const str = String(Math.max(0, Math.min(Math.round(val), Math.pow(10, n) - 1))).padStart(n, "0");
+    el.setAttribute("aria-label", String(+str));
+    el.querySelectorAll(".dw").forEach((dw, i) => {
+      dw.style.transition = "none"; dw.style.transform = "translateY(0)"; void dw.offsetWidth;
+      dw.style.setProperty("--dl", i * 0.12 + "s"); dw.style.transition = ""; dw.style.transform = "translateY(-" + (10 + +str[i]) + "em)";
+    });
+  }
+  buildOdo($("oPct"), 3, "%"); buildOdo($("oAtt"), 3); buildOdo($("oTot"), 3);
+  function pump(s) {
+    setOdo($("oPct"), s.pct, 3); setOdo($("oAtt"), s.att, 3); setOdo($("oTot"), s.tot, 3);
+    const f = $("pFill"); f.style.setProperty("--c", s.pct < 50 ? "#ff7b80" : s.pct < TARGET ? "#ffbd4a" : "#5fffb0"); f.style.width = "0";
+    requestAnimationFrame(() => requestAnimationFrame(() => { f.style.width = s.pct + "%"; }));
+  }
+
+  /* ---------- pie chart + absences ---------- */
+  function pie(c) {
+    const n = c.p + c.l + c.a + c.v, segs = [["pp", c.p], ["pl", c.l], ["pa", c.a], ["pv", c.v]];
+    const lens = segs.map(([, v]) => (n ? v / n * 100 : 0)); let acc = 0; const starts = lens.map((l) => { const x = acc; acc += l; return x; });
+    cancelAnimationFrame(pie.r);
+    const draw = (t) => segs.forEach(([id], i) => { const el = $(id), vis = Math.max(0, Math.min(lens[i], t * 100 - starts[i]));
+      el.setAttribute("stroke-dasharray", vis + " 100"); el.setAttribute("stroke-dashoffset", -starts[i]); });
+    if (reduce) { draw(1); return; }
+    const t0 = performance.now(), step = (t) => { const k = Math.min((t - t0) / 1600, 1); draw(1 - Math.pow(1 - k, 3)); if (k < 1) pie.r = requestAnimationFrame(step); };
+    pie.r = requestAnimationFrame(step);
+  }
+  function legend(s, list) {
+    const n = s.p + s.l + s.a + s.v, pc = (v) => (n ? Math.round(v / n * 100) : 0);
+    [["P", s.p], ["L", s.l], ["A", s.a], ["V", s.v]].forEach(([k, v]) => { countTo($("l" + k), v, (x) => x, 1500); countTo($("l" + k + "p"), pc(v), (x) => x + "%", 1500); });
+    countTo($("aN"), s.a, (x) => x, 1500); countTo($("aP"), s.tot ? Math.round(s.a / s.tot * 100) : 0, (x) => x + "% of classes", 1500);
+    const ab = list.filter((r) => r.s === "a").slice(-10).reverse();
+    $("aList").innerHTML = ab.length ? ab.map((r, i) => { const [, m, d] = r.k.split("-").map(Number); return `<span style="animation-delay:${i * 80}ms">${d} ${MON[m - 1]}</span>`; }).join("")
+      : `<span style="background:rgba(31,169,113,.15);color:var(--green)">${s.tot ? "No absences" : "No data yet"}</span>`;
+  }
+
+  /* ---------- helpers ---------- */
+  const calc = (list) => { const c = { p:0, a:0, l:0, v:0 }; list.forEach((r) => c[r.s]++);
+    const tot = c.p + c.a + c.l, att = c.p + c.l; return { ...c, tot, att, pct:tot ? Math.round(att / tot * 100) : 0 }; };
+  function streaks() {
+    const l = recs.filter((r) => r.s !== "v"); let cur = 0, best = 0, run = 0;
+    l.forEach((r) => { if (r.s === "a") run = 0; else { run++; best = Math.max(best, run); } });
+    for (let i = l.length - 1; i >= 0 && l[i].s !== "a"; i--) cur++;
+    return { cur, best };
+  }
+  function bump(el, pct) { const f = el; f.style.width = "0"; requestAnimationFrame(() => requestAnimationFrame(() => { f.style.width = pct + "%"; })); }
+  const sameDay = (r) => r.k === todayK;
+
+  function render() {
+    const list = per === "all" ? recs : recs.filter((r) => r.k.startsWith(per)), s = calc(list);
+    $("sub").textContent = recs.length ? s.tot + " classes counted · " + recs.length + " records" : "No records yet";
+    $("gCap").textContent = per === "all" ? "Overall attendance" : $("per").selectedOptions[0].textContent;
+    pump(s); pie(s); legend(s, list);
+    const chip = $("gChip"); chip.className = "chipst " + (!s.tot ? "" : s.pct >= TARGET ? "ok" : s.pct >= 60 ? "mid" : "bad");
+    chip.textContent = !s.tot ? "No data" : s.pct >= TARGET ? "On track" : s.pct >= 60 ? "Needs attention" : "Low attendance";
+    countTo($("sP"), s.p); countTo($("sA"), s.a); countTo($("sL"), s.l); countTo($("sV"), s.v);
+    const st = streaks(); countTo($("sS"), st.cur); countTo($("sB"), st.best);
+
+    /* target */
+    let msg;
+    if (!s.tot) msg = "Your target is <b>" + TARGET + "%</b>. Records will show here once classes are marked.";
+    else if (s.pct >= TARGET) { const k = Math.floor(s.att / (TARGET / 100) - s.tot); msg = "Great going! You can miss up to <b>" + Math.max(k, 0) + "</b> more class" + (k === 1 ? "" : "es") + " and still stay above <b>" + TARGET + "%</b>."; }
+    else { const k = Math.ceil((TARGET / 100 * s.tot - s.att) / (1 - TARGET / 100)); msg = "Attend the next <b>" + k + "</b> class" + (k === 1 ? "" : "es") + " in a row to reach <b>" + TARGET + "%</b>."; }
+    $("tMsg").innerHTML = msg;
+    $("tFill").style.background = s.pct >= TARGET ? "var(--green)" : s.pct >= 60 ? "var(--orange)" : "var(--red)";
+    bump($("tFill"), s.pct);
+
+    /* 6-month trend */
+    let bh = "";
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(today.getFullYear(), today.getMonth() - i, 1), key = mk(d.getFullYear(), d.getMonth()), m = calc(recs.filter((r) => r.k.startsWith(key)));
+      bh += `<div class="bcol${per === key || (per === "all" && i === 0) ? " cur" : ""}"><em>${m.tot ? m.pct + "%" : "–"}</em><div class="bar" data-h="${m.pct}" style="--i:${5 - i}"></div><small>${MON[d.getMonth()]}</small></div>`;
+    }
+    $("bars").innerHTML = bh;
+    requestAnimationFrame(() => requestAnimationFrame(() => $("bars").querySelectorAll(".bar").forEach((b) => { b.style.height = (+b.dataset.h * 0.78) + "%"; })));
+
+    /* subjects */
+    const subs = {}; list.forEach((r) => { if (r.sub && r.s !== "v") { (subs[r.sub] = subs[r.sub] || []).push(r); } });
+    const names = Object.keys(subs).sort();
+    $("subjCard").hidden = !names.length;
+    $("subj").innerHTML = names.map((n) => { const m = calc(subs[n]);
+      return `<div class="srow"><div class="l">${esc(n)}<span>${m.att}/${m.tot} · ${m.pct}%</span></div><div class="pbar"><div class="pfill" data-p="${m.pct}" style="background:${m.pct >= TARGET ? "var(--green)" : m.pct >= 60 ? "var(--orange)" : "var(--red)"}"></div></div></div>`; }).join("");
+    $("subj").querySelectorAll(".pfill").forEach((f) => bump(f, +f.dataset.p));
+
+    /* recent log */
+    const rec = recs.slice(-8).reverse();
+    $("log").innerHTML = rec.length ? rec.map((r, i) => { const [y, m, d] = r.k.split("-").map(Number);
+      return `<div class="nrow" style="--d:${i * 70}ms"><span class="tx"><strong>${esc(new Date(y, m - 1, d).toLocaleDateString("en-IN", { weekday:"short", day:"numeric", month:"short", year:"numeric" }))}</strong><small>${esc(r.sub || r.note || "Class")}</small></span><span class="pill ${r.s}">${LBL[r.s]}</span></div>`; }).join("")
+      : `<div class="empty"><b>No attendance records yet</b><p>Add documents in Firestore at:</p><code>attendance/${esc(uid || "{studentUid}")}_2026-11\n{ uid: "your-student-uid", month: "2026-11", days: { "4": "P" } }</code></div>`;
+    renderCal(0);
+  }
+
+  /* ---------- calendar ---------- */
+  function info() {
+    const el = $("cInfo"); if (!cSel) { el.innerHTML = "<small>Tap a date to see details</small>"; return; }
+    const [y, m, d] = cSel.split("-").map(Number), r = byK[cSel], dt = new Date(y, m - 1, d), st = r ? r.s : dt.getDay() === 0 ? "h" : null;
+    el.innerHTML = `<b>${esc(dt.toLocaleDateString("en-IN", { weekday:"long", day:"numeric", month:"long", year:"numeric" }))}</b><small>${st ? LBL[st] : "No record"}${r && (r.sub || r.note) ? " · " + esc(r.sub || r.note) : ""}</small>`;
+    if (!reduce && el.animate) el.animate([{ opacity:0, transform:"translateY(8px)" }, { opacity:1, transform:"none" }], { duration:300, easing:"ease-out" });
+  }
+  function renderCal(dir) {
+    const first = new Date(cy, cm, 1).getDay(), dim = new Date(cy, cm + 1, 0).getDate(); let h = "";
+    for (let i = 0; i < first; i++) h += '<div class="cd e"></div>';
+    for (let d = 1; d <= dim; d++) {
+      const k = mk(cy, cm) + "-" + p2(d), r = byK[k], st = r ? r.s : new Date(cy, cm, d).getDay() === 0 ? "h" : "";
+      h += `<button type="button" class="cd ${st}${k === todayK ? " td" : ""}${k === cSel ? " sel" : ""}" data-k="${k}" style="--i:${first + d - 1}">${d}</button>`;
+    }
+    $("cGrid").innerHTML = h; $("cTitle").textContent = new Date(cy, cm, 1).toLocaleDateString("en-IN", { month:"long", year:"numeric" });
+    if (dir && !reduce && $("cTitle").animate) $("cTitle").animate([{ opacity:0, transform:`translateX(${dir * 22}px)` }, { opacity:1, transform:"none" }], { duration:350, easing:"ease-out" });
+    info();
+  }
+  const go = (d) => { const n = new Date(cy, cm + d, 1); cy = n.getFullYear(); cm = n.getMonth(); cSel = null; renderCal(d); };
+  $("cPrev").onclick = () => go(-1); $("cNext").onclick = () => go(1);
+  $("cGrid").addEventListener("click", (e) => { const b = e.target.closest(".cd[data-k]"); if (!b) return;
+    cSel = b.dataset.k; $("cGrid").querySelectorAll(".sel").forEach((x) => x.classList.remove("sel")); b.classList.add("sel"); info(); });
+  let sx = null;
+  $("cGrid").addEventListener("touchstart", (e) => { sx = e.touches[0].clientX; }, { passive:true });
+  $("cGrid").addEventListener("touchend", (e) => { if (sx === null) return; const dx = e.changedTouches[0].clientX - sx; sx = null; if (Math.abs(dx) > 50) go(dx < 0 ? 1 : -1); }, { passive:true });
+
+  /* ---------- period selector ---------- */
+  (function () {
+    let h = '<option value="all">All time</option>';
+    for (let i = 0; i < 6; i++) { const d = new Date(today.getFullYear(), today.getMonth() - i, 1); h += `<option value="${mk(d.getFullYear(), d.getMonth())}">${i === 0 ? "This month" : MON[d.getMonth()] + " " + d.getFullYear()}</option>`; }
+    $("per").innerHTML = h;
+  })();
+  $("per").addEventListener("change", (e) => { per = e.target.value; render(); });
+
+  /* ---------- Firebase ---------- */
+  const banner = (m) => { $("banner").textContent = m; $("banner").hidden = false; };
+  const norm = (d) => {
+    const s = String(d.status ?? (d.present === true ? "present" : d.present === false ? "absent" : "")).toLowerCase().trim();
+    if (!s) return null; if (["leave", "excused", "holiday", "v"].includes(s)) return "v";
+    return s[0] === "p" ? "p" : s[0] === "a" ? "a" : s[0] === "l" ? "l" : null;
+  };
+  const keyOf = (id, d) => { if (/^\d{4}-\d{2}-\d{2}$/.test(id)) return id; const v = d.date, dt = v && v.toDate ? v.toDate() : v ? new Date(v) : null;
+    return dt && !isNaN(dt) ? dt.getFullYear() + "-" + p2(dt.getMonth() + 1) + "-" + p2(dt.getDate()) : null; };
+
+  if (location.protocol === "file:") banner("This page was opened as a file. Firebase needs a web server: use VS Code Live Server, 'npx serve', or upload to hosting.");
+  const app = initializeApp(firebaseConfig), auth = getAuth(app), db = getFirestore(app);
+  let unsub = null;
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { location.replace(LOGIN_PAGE); return; }
+    uid = user.uid;
+    try { const s = await getDoc(doc(db, "students", uid)); if (s.exists() && s.data().blocked) { location.replace(LOGIN_PAGE + "#blocked"); return; } } catch (e) {}
+    if (unsub) unsub();
+    // Teacher portal stores monthly attendance documents in the top-level
+    // "attendance" collection: { uid, month:"YYYY-MM", days:{ "4":"P"|"A" } }.
+    const attendanceQuery = query(collection(db, "attendance"), where("uid", "==", uid));
+    unsub = onSnapshot(attendanceQuery, (snap) => {
+      recs = [];
+      snap.forEach((attendanceDoc) => {
+        const data = attendanceDoc.data() || {};
+        const month = String(data.month || "");
+        const days = data.days && typeof data.days === "object" ? data.days : {};
+        if (!/^\\d{4}-\\d{2}$/.test(month)) return;
+
+        Object.entries(days).forEach(([dayValue, statusValue]) => {
+          const day = Number(dayValue);
+          if (!Number.isInteger(day) || day < 1 || day > 31) return;
+          const k = month + "-" + p2(day);
+          const value = String(statusValue || "").toUpperCase().trim();
+          const s = value === "P" || value === "PRESENT" ? "p"
+            : value === "A" || value === "ABSENT" ? "a"
+            : value === "H" || value === "HOLIDAY" ? "v"
+            : norm({ status: value });
+          if (s) recs.push({ k, s, sub: data.subject || data.course || "", note: data.note || "" });
+        });
+      });
+
+      const unique = new Map(recs.map((record) => [record.k, record]));
+      recs = [...unique.values()].sort((a, b) => a.k.localeCompare(b.k));
+      byK = {};
+      recs.forEach((record) => { byK[record.k] = record; });
+      $("live").classList.add("on");
+      $("banner").hidden = true;
+      render();
+    }, (e) => {
+      render();
+      banner("Could not read attendance (" + (e.code || e.message) + "). Check Firestore read rules for the top-level attendance collection.");
+    });
+  });
+  render();
+</script>
+</body>
+</html>

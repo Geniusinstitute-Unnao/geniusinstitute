@@ -269,7 +269,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-  import { getFirestore, doc, getDoc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { getFirestore, doc, getDoc, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDbxUTsBSeFIevnbJadEHkubyKBRHdDM94",
@@ -281,7 +281,7 @@
     measurementId: "G-10RZJQMHR7"
   };
   const LOGIN_PAGE = "login.html", TARGET = 75;
-  /* Firestore layout:  students/{uid}/attendance/{YYYY-MM-DD}  ->  { status:"present"|"absent"|"late"|"leave", subject?:"Maths", note?:"..." } */
+  /* Teacher portal layout: attendance/{studentUid}_{YYYY-MM} -> { uid, month:"YYYY-MM", days:{ "4":"P"|"A" } } */
 
   const $ = (id) => document.getElementById(id);
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
@@ -393,7 +393,7 @@
     const rec = recs.slice(-8).reverse();
     $("log").innerHTML = rec.length ? rec.map((r, i) => { const [y, m, d] = r.k.split("-").map(Number);
       return `<div class="nrow" style="--d:${i * 70}ms"><span class="tx"><strong>${esc(new Date(y, m - 1, d).toLocaleDateString("en-IN", { weekday:"short", day:"numeric", month:"short", year:"numeric" }))}</strong><small>${esc(r.sub || r.note || "Class")}</small></span><span class="pill ${r.s}">${LBL[r.s]}</span></div>`; }).join("")
-      : `<div class="empty"><b>No attendance records yet</b><p>Add documents in Firestore at:</p><code>students/${esc(uid || "{uid}")}/attendance/2026-11-04\n{ status: "present", subject: "Maths" }</code></div>`;
+      : `<div class="empty"><b>No attendance records yet</b><p>Add documents in Firestore at:</p><code>attendance/${esc(uid || "{studentUid}")}_2026-11\n{ uid: "your-student-uid", month: "2026-11", days: { "4": "P" } }</code></div>`;
     renderCal(0);
   }
 
@@ -449,11 +449,41 @@
     uid = user.uid;
     try { const s = await getDoc(doc(db, "students", uid)); if (s.exists() && s.data().blocked) { location.replace(LOGIN_PAGE + "#blocked"); return; } } catch (e) {}
     if (unsub) unsub();
-    unsub = onSnapshot(collection(db, "students", uid, "attendance"), (snap) => {
-      recs = []; snap.forEach((d) => { const x = d.data(), k = keyOf(d.id, x), s = norm(x); if (k && s) recs.push({ k, s, sub:x.subject || x.course || "", note:x.note || "" }); });
-      recs.sort((a, b) => (a.k < b.k ? -1 : 1)); byK = {}; recs.forEach((r) => { byK[r.k] = r; });
-      $("live").classList.add("on"); $("banner").hidden = true; render();
-    }, (e) => { render(); banner("Could not read attendance (" + (e.code || e.message) + "). Check your Firestore rules for students/{uid}/attendance."); });
+    // Teacher portal stores monthly attendance documents in the top-level
+    // "attendance" collection: { uid, month:"YYYY-MM", days:{ "4":"P"|"A" } }.
+    const attendanceQuery = query(collection(db, "attendance"), where("uid", "==", uid));
+    unsub = onSnapshot(attendanceQuery, (snap) => {
+      recs = [];
+      snap.forEach((attendanceDoc) => {
+        const data = attendanceDoc.data() || {};
+        const month = String(data.month || "");
+        const days = data.days && typeof data.days === "object" ? data.days : {};
+        if (!/^\d{4}-\d{2}$/.test(month)) return;
+
+        Object.entries(days).forEach(([dayValue, statusValue]) => {
+          const day = Number(dayValue);
+          if (!Number.isInteger(day) || day < 1 || day > 31) return;
+          const k = month + "-" + p2(day);
+          const value = String(statusValue || "").toUpperCase().trim();
+          const s = value === "P" || value === "PRESENT" ? "p"
+            : value === "A" || value === "ABSENT" ? "a"
+            : value === "H" || value === "HOLIDAY" ? "v"
+            : norm({ status: value });
+          if (s) recs.push({ k, s, sub: data.subject || data.course || "", note: data.note || "" });
+        });
+      });
+
+      const unique = new Map(recs.map((record) => [record.k, record]));
+      recs = [...unique.values()].sort((a, b) => a.k.localeCompare(b.k));
+      byK = {};
+      recs.forEach((record) => { byK[record.k] = record; });
+      $("live").classList.add("on");
+      $("banner").hidden = true;
+      render();
+    }, (e) => {
+      render();
+      banner("Could not read attendance (" + (e.code || e.message) + "). Check Firestore read rules for the top-level attendance collection.");
+    });
   });
   render();
 </script>
